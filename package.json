@@ -1,0 +1,26 @@
+{
+  "name": "botica_nova_salud",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ViCaptum/botica_nova_salud.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ViCaptum/botica_nova_salud/issues"
+  },
+  "homepage": "https://github.com/ViCaptum/botica_nova_salud#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "mysql2": "^3.22.3"
+  }
+}
