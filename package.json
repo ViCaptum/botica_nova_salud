@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/ViCaptum/botica_nova_salud#readme",
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mysql2": "^3.22.3"
   }
