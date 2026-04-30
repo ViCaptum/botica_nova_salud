@@ -1,163 +1,120 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // Tu conexión a la base de datos
+const pool = require('../db');
 
-// OBTENER PRODUCTOS CON FILTROS (Búsqueda + Tipo)
-router.get('/', async (req, res) => {
+const { auth, validarRol } = require('../middlewares/auth');
+
+const ROLES = {
+    ADMIN: 1,
+    VENDEDOR: 2
+};
+
+// Obtener inventario registrado (ADMIN Y VENDEDOR)
+router.get('/', auth, async (req, res) => {
     try {
-        // Recibimos los filtros del frontend
-        // tipo puede ser: 'todos', 'generico', 'marca'
-        const { buscar, tipo } = req.query; 
+        const { buscar, tipo } = req.query;
 
         let query = 'SELECT * FROM VISTA_CATALOGO_PRODUCTOS WHERE 1=1';
         let valores = [];
 
-        // 1. Filtro por búsqueda (nombre o código)
         if (buscar) {
             query += ' AND (nombre_producto LIKE ? OR codigo_barras = ?)';
             valores.push(`%${buscar}%`, buscar);
         }
 
-        // 2. Filtro por Combo Box (Tipo de medicamento)
-        if (tipo === 'generico') {
-            query += ' AND es_generico = 1';
-        } else if (tipo === 'marca') {
-            query += ' AND es_generico = 0';
-        }
-        // Si es 'todos', no añadimos nada a la query y trae todo por defecto
+        if (tipo === 'generico') query += ' AND es_generico = 1';
+        if (tipo === 'marca') query += ' AND es_generico = 0';
 
         const [productos] = await pool.query(query, valores);
         res.json(productos);
 
     } catch (error) {
-        console.error("Error al filtrar inventario:", error);
-        res.status(500).json({ error: 'Error al procesar los filtros de inventario' });
+        res.status(500).json({ error: 'Error al obtener inventario' });
     }
 });
 
-// 2. CREAR UN NUEVO PRODUCTO (Solo Admins)
-router.post('/', async (req, res) => {
+// Crear producto (SOLO ADMIN)
+router.post('/', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
     try {
-        // En el futuro, aquí validaremos que req.usuario.rol === 'admin'
-        
-        // Extraemos los datos que el frontend envía en el "body" de la petición
-        const { 
-            id_categoria, 
-            id_laboratorio, 
-            codigo_barras, 
-            nombre_producto, 
-            es_generico, 
-            precio_venta, 
-            stock_actual, 
-            stock_minimo 
+        const {
+            id_categoria,
+            id_laboratorio,
+            codigo_barras,
+            nombre_producto,
+            es_generico,
+            precio_venta,
+            stock_actual,
+            stock_minimo
         } = req.body;
 
-        // Validación básica (Evita código basura en la BD)
-        if (!nombre_producto || !precio_venta || !id_categoria) {
-            return res.status(400).json({ error: 'Faltan campos obligatorios' });
+        if (!nombre_producto || precio_venta <= 0) {
+            return res.status(400).json({ error: 'Datos inválidos' });
         }
 
-        // Consulta parametrizada (Los signos ? evitan inyecciones SQL)
         const query = `
             INSERT INTO PRODUCTOS 
             (id_categoria, id_laboratorio, codigo_barras, nombre_producto, es_generico, precio_venta, stock_actual, stock_minimo) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        
-        const valores = [id_categoria, id_laboratorio, codigo_barras, nombre_producto, es_generico, precio_venta, stock_actual, stock_minimo];
 
-        // Ejecutamos la inserción
-        const [resultado] = await pool.query(query, valores);
+        const [resultado] = await pool.query(query, [
+            id_categoria,
+            id_laboratorio,
+            codigo_barras,
+            nombre_producto,
+            es_generico,
+            precio_venta,
+            stock_actual || 0,
+            stock_minimo || 0
+        ]);
 
-        // Devolvemos confirmación al frontend
-        res.status(201).json({ 
-            mensaje: 'Producto creado exitosamente', 
-            id_producto: resultado.insertId 
-        });
+        res.status(201).json({ id_producto: resultado.insertId });
 
     } catch (error) {
-        console.error("Error al crear producto:", error);
-        res.status(500).json({ error: 'Error al registrar el producto en la base de datos' });
+        res.status(500).json({ error: 'Error al crear producto' });
     }
 });
 
-// 3. ACTUALIZAR UN PRODUCTO (Solo Admins)
-router.put('/:id', async (req, res) => {
+// Actualizar producto (SOLO ADMIN)
+router.put('/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
     try {
-        // Capturamos el ID directamente de la URL (ej. /api/inventario/5)
         const { id } = req.params;
-        
-        // Extraemos los nuevos datos del body
-        const { 
-            id_categoria, 
-            id_laboratorio, 
-            codigo_barras, 
-            nombre_producto, 
-            es_generico, 
-            precio_venta, 
-            stock_actual, 
-            stock_minimo 
-        } = req.body;
 
-        // Validación básica
-        if (!nombre_producto || !precio_venta) {
-            return res.status(400).json({ error: 'Faltan campos obligatorios para actualizar' });
-        }
+        const query = `UPDATE PRODUCTOS SET ? WHERE id_producto = ?`;
+        const [resultado] = await pool.query(query, [req.body, id]);
 
-        const query = `
-            UPDATE PRODUCTOS 
-            SET id_categoria = ?, id_laboratorio = ?, codigo_barras = ?, 
-                nombre_producto = ?, es_generico = ?, precio_venta = ?, 
-                stock_actual = ?, stock_minimo = ?
-            WHERE id_producto = ?
-        `;
-        
-        // El ID siempre va al final porque corresponde al último signo ? del WHERE
-        const valores = [id_categoria, id_laboratorio, codigo_barras, nombre_producto, es_generico, precio_venta, stock_actual, stock_minimo, id];
-
-        const [resultado] = await pool.query(query, valores);
-
-        // Buena práctica: Verificar si el producto realmente existía
         if (resultado.affectedRows === 0) {
-            return res.status(404).json({ error: 'Producto no encontrado en la base de datos' });
+            return res.status(404).json({ error: 'Producto no encontrado' });
         }
 
-        res.json({ mensaje: 'Producto actualizado correctamente' });
+        res.json({ mensaje: 'Actualizado' });
 
-    } catch (error) {
-        console.error("Error al actualizar producto:", error);
-        res.status(500).json({ error: 'Error al actualizar el producto' });
+    } catch {
+        res.status(500).json({ error: 'Error al actualizar' });
     }
 });
 
-// 4. ELIMINAR UN PRODUCTO (Solo Admins)
-router.delete('/:id', async (req, res) => {
+// Eliminar producto (SOLO ADMIN)
+router.delete('/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
     try {
-        // Capturamos el ID de la URL
         const { id } = req.params;
 
-        const query = 'DELETE FROM PRODUCTOS WHERE id_producto = ?';
-        
-        const [resultado] = await pool.query(query, [id]);
+        const [resultado] = await pool.query(
+            'DELETE FROM PRODUCTOS WHERE id_producto = ?',
+            [id]
+        );
 
-        // Verificamos si la base de datos realmente borró algo
         if (resultado.affectedRows === 0) {
-            return res.status(404).json({ error: 'Producto no encontrado, no se pudo eliminar' });
+            return res.status(404).json({ error: 'No encontrado' });
         }
 
-        res.json({ mensaje: 'Producto eliminado correctamente' });
+        res.json({ mensaje: 'Eliminado' });
 
     } catch (error) {
-        console.error("Error al eliminar producto:", error);
-        
-        // Capturamos errores de llave foránea (Integridad referencial)
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
-            return res.status(409).json({ 
-                error: 'No se puede eliminar este producto porque ya tiene ventas registradas.' 
-            });
+            return res.status(409).json({ error: 'Producto con ventas' });
         }
-        
-        res.status(500).json({ error: 'Error al eliminar el producto' });
+        res.status(500).json({ error: 'Error al eliminar' });
     }
 });
 
