@@ -119,5 +119,30 @@ router.get('/dashboard', auth, validarRol([ROLES.ADMIN, ROLES.VENDEDOR]), (req, 
     });
 });
 
+router.get('/', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
+    try {
+        // MUY IMPORTANTE: Especificamos las columnas. 
+        // Renombramos id_usuario a "id" y id_rol a "rol" para que coincida con lo que espera el JS del frontend.
+        // NUNCA incluimos password_hash aquí.
+        const query = `
+            SELECT 
+                id_usuario AS id, 
+                nombre, 
+                apellidos, 
+                username, 
+                id_rol AS rol 
+            FROM USUARIOS
+        `;
+        
+        const [usuarios] = await pool.query(query);
+        
+        res.json(usuarios);
+
+    } catch (error) {
+        console.error("Error al obtener la lista de usuarios:", error);
+        res.status(500).json({ error: 'Error interno al cargar los empleados' });
+    }
+});
+
 module.exports = router;
 

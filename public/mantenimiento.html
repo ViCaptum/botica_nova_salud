@@ -7,50 +7,83 @@
 </head>
 <body>
     <main>
-        <section>
-            <h2>Gestión de Catálogos</h2>
-            <p style="color: var(--texto-secundario);">Agrega nuevas categorías o laboratorios para usarlos en el inventario.</p>
+        <div style="margin-bottom: 25px;">
+            <h2 style="font-size: 2em; margin-bottom: 5px;">Gestión de Catálogos</h2>
+            <p style="color: var(--texto-secundario);">Administra las clasificaciones y marcas para el inventario de la botica.</p>
+        </div>
+        
+        <!-- Usamos tu grilla para dividir la pantalla en dos columnas perfectas -->
+        <div class="form-grid" style="align-items: start; gap: 30px;">
             
-            <div class="form-grid" style="margin-top: 20px;">
-                <!-- Formulario Categorías -->
-                <div style="background: var(--bg-input); padding: 15px; border-radius: 8px;">
-                    <h3>Nueva Categoría</h3>
-                    <form id="form-nueva-categoria">
-                        <label>Nombre:</label>
-                        <input type="text" id="cat-nombre" placeholder="Ej. Analgésicos" required>
-                        <button type="submit" style="width: 100%; margin-top: 10px;">Agregar Categoría</button>
+            <!-- ========================================== -->
+            <!-- PANEL CATEGORÍAS -->
+            <!-- ========================================== -->
+            <section style="margin-bottom: 0; padding: 25px;">
+                <h3 style="display: flex; align-items: center; gap: 10px; color: var(--color-primario); margin-bottom: 20px;">
+                    🏷️ Categorías
+                </h3>
+                
+                <!-- Formulario compacto (Botón al lado del input) -->
+                <div style="background: var(--bg-input); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--borde);">
+                    <form id="form-nueva-categoria" style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 0;">
+                        <div style="flex-grow: 1; margin-bottom: 0;">
+                            <label for="cat-nombre">Nueva Categoría:</label>
+                            <input type="text" id="cat-nombre" placeholder="Ej. Analgésicos" required>
+                        </div>
+                        <button type="submit" style="white-space: nowrap; padding: 12px 15px;">+ Agregar</button>
                     </form>
                 </div>
 
-                <!-- Formulario Laboratorios -->
-                <div style="background: var(--bg-input); padding: 15px; border-radius: 8px;">
-                    <h3>Nuevo Laboratorio</h3>
-                    <form id="form-nuevo-laboratorio">
-                        <label>Nombre:</label>
-                        <input type="text" id="lab-nombre" placeholder="Ej. Pfizer" required>
-                        <button type="submit" style="width: 100%; margin-top: 10px;">Agregar Laboratorio</button>
+                <!-- Tabla con scroll interno y cabecera fija -->
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 8px;">
+                    <table style="margin-top: 0; border: none;">
+                        <thead style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Listado de Categorías</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-categorias-mante">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PANEL LABORATORIOS -->
+            <!-- ========================================== -->
+            <section style="margin-bottom: 0; padding: 25px;">
+                <h3 style="display: flex; align-items: center; gap: 10px; color: var(--color-primario); margin-bottom: 20px;">
+                    🔬 Laboratorios
+                </h3>
+                
+                <!-- Formulario compacto -->
+                <div style="background: var(--bg-input); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--borde);">
+                    <form id="form-nuevo-laboratorio" style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 0;">
+                        <div style="flex-grow: 1; margin-bottom: 0;">
+                            <label for="lab-nombre">Nuevo Laboratorio:</label>
+                            <input type="text" id="lab-nombre" placeholder="Ej. Pfizer" required>
+                        </div>
+                        <button type="submit" style="white-space: nowrap; padding: 12px 15px;">+ Agregar</button>
                     </form>
                 </div>
-            </div>
-        </section>
 
-        <!-- Listados actuales para verificar -->
-        <section class="form-grid">
-            <div>
-                <h3>Categorías Registradas</h3>
-                <table border="1">
-                    <thead><tr><th>Nombre</th></tr></thead>
-                    <tbody id="tabla-categorias-mante"></tbody>
-                </table>
-            </div>
-            <div>
-                <h3>Laboratorios Registrados</h3>
-                <table border="1">
-                    <thead><tr><th>Nombre</th></tr></thead>
-                    <tbody id="tabla-laboratorios-mante"></tbody>
-                </table>
-            </div>
-        </section>
+                <!-- Tabla con scroll interno y cabecera fija -->
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 8px;">
+                    <table style="margin-top: 0; border: none;">
+                        <thead style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Listado de Laboratorios</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-laboratorios-mante">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
     </main>
 
     <script src="js/auth.js"></script>

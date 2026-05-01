@@ -9,7 +9,7 @@ async function cargarCatalogo() {
     const termino = inputBuscar.value.trim();
     let endpoint = '/inventario';
     
-    // Si hay búsqueda, añadimos la query string
+    // Si hay búsqueda, añadimos la query string[cite: 26]
     if (termino) {
         endpoint += `?buscar=${encodeURIComponent(termino)}`;
     }
@@ -24,29 +24,38 @@ async function cargarCatalogo() {
 }
 
 function renderizarCatalogo(productos) {
-    tbodyCatalogo.innerHTML = ''; // Limpiamos la tabla
+    tbodyCatalogo.innerHTML = ''; 
     
     if (productos.length === 0) {
-        tbodyCatalogo.innerHTML = '<tr><td colspan="4" style="text-align: center;">No se encontraron productos.</td></tr>';
+        tbodyCatalogo.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--texto-secundario);">No se encontraron productos.</td></tr>';
         return;
     }
 
     productos.forEach(prod => {
-        // Lógica visual: Si el stock actual es menor o igual al mínimo, alertamos
-        // Si tu vista no devuelve stock_minimo, asumimos 5 como crítico general
+        // Lógica visual: Si el stock actual es menor o igual al mínimo (o 5 por defecto)[cite: 26]
         const stockCritico = prod.stock_actual <= (prod.stock_minimo || 5);
         
         const tr = document.createElement('tr');
         
-        // Pintamos la fila de rojo suave si está en crítico
+        // Pintamos la fila con un fondo rojo muy sutil si está en crítico
         if (stockCritico) {
-            tr.style.backgroundColor = 'rgba(207, 102, 121, 0.15)'; 
+            tr.style.backgroundColor = 'rgba(239, 68, 68, 0.05)'; 
         }
 
+        // Dividimos la información en 5 columnas ahora
         tr.innerHTML = `
-            <td>${prod.nombre_producto} <br><small style="color: var(--texto-secundario)">${prod.codigo_barras || 'Sin código'}</small></td>
-            <td>${prod.es_generico ? 'Genérico' : 'De Marca'}</td>
-            <td style="font-weight: bold; color: var(--color-primario);">S/ ${prod.precio_venta}</td>
+            <td style="color: var(--texto-secundario); font-family: monospace; letter-spacing: 1px;">
+                ${prod.codigo_barras || 'N/A'}
+            </td>
+            <td style="font-weight: 500;">
+                ${prod.nombre_producto}
+            </td>
+            <td>
+                ${prod.es_generico ? 'Genérico' : 'De Marca'}
+            </td>
+            <td style="font-weight: 600; color: var(--color-primario);">
+                S/ ${parseFloat(prod.precio_venta).toFixed(2)}
+            </td>
             <td style="color: ${stockCritico ? 'var(--error)' : 'var(--exito)'}; font-weight: bold;">
                 ${prod.stock_actual} ${stockCritico ? '⚠️' : ''}
             </td>
@@ -56,27 +65,23 @@ function renderizarCatalogo(productos) {
 }
 
 function verificarStockCritico(productos) {
-    // Filtramos cuántos productos están en peligro
     const productosEnPeligro = productos.filter(p => p.stock_actual <= (p.stock_minimo || 5));
     
     if (productosEnPeligro.length > 0 && !alertaEmitida) {
-        // Generamos la voz sintética del navegador
         const mensaje = new SpeechSynthesisUtterance(`Atención. Hay ${productosEnPeligro.length} medicamentos con stock bajo en la botica.`);
-        mensaje.lang = 'es-ES'; // Acento en español
-        mensaje.rate = 1.0;     // Velocidad normal
+        mensaje.lang = 'es-ES'; 
+        mensaje.rate = 1.0;     
         
-        // Hacemos que la computadora hable
         window.speechSynthesis.speak(mensaje);
-        
-        alertaEmitida = true; // Marcamos para que no hable repetidamente en la misma sesión
+        alertaEmitida = true; 
     }
 }
 
-// Eventos
+// Eventos[cite: 26]
 btnBuscar.addEventListener('click', cargarCatalogo);
 inputBuscar.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') cargarCatalogo();
 });
 
-// Cargar automáticamente al abrir el dashboard
+// Cargar automáticamente al abrir el dashboard[cite: 26]
 document.addEventListener('DOMContentLoaded', cargarCatalogo);

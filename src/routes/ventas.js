@@ -71,4 +71,41 @@ router.post('/', auth, validarRol([ROLES.ADMIN, ROLES.VENDEDOR]), async (req, re
     }
 });
 
+router.get('/', auth, async (req, res) => {
+    try {
+        const { vendedor_id } = req.query;
+        
+        // Usamos la vista que ya creaste en tu DB[cite: 28].
+        // Aplicamos alias (AS) para que coincida con lo que el frontend JS espera.
+        let query = `
+            SELECT 
+                id_venta, 
+                fecha_venta, 
+                vendedor AS nombre_vendedor, 
+                dni_cliente, 
+                total_venta AS total 
+            FROM VISTA_HISTORIAL_VENTAS 
+            WHERE 1=1
+        `;
+        
+        let valores = [];
+
+        // Si se envió un ID desde el filtro de autocompletado, filtramos
+        if (vendedor_id) {
+            query += ' AND id_usuario = ?';
+            valores.push(vendedor_id);
+        }
+
+        // Ordenamos para que las ventas más recientes salgan arriba
+        query += ' ORDER BY fecha_venta DESC';
+
+        const [ventas] = await pool.query(query, valores);
+        res.json(ventas);
+
+    } catch (error) {
+        console.error("Error al obtener el historial de ventas:", error);
+        res.status(500).json({ error: 'Error interno al cargar el historial' });
+    }
+});
+
 module.exports = router;

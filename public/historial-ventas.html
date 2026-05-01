@@ -5,23 +5,37 @@
     <title>Historial de Ventas - Botica Nova Salud</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
+        /* Estilos del Autocompletado modernizados para combinar con el nuevo CSS */
         .autocomplete-container { position: relative; width: 100%; }
         .autocomplete-list {
             position: absolute; top: 100%; left: 0; right: 0; z-index: 99;
-            background-color: var(--bg-input); border: 1px solid var(--borde);
-            border-radius: 4px; max-height: 150px; overflow-y: auto; display: none;
+            background-color: var(--bg-superficie); border: 1px solid var(--color-primario);
+            border-radius: 8px; max-height: 200px; overflow-y: auto; display: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); margin-top: 5px;
         }
-        .autocomplete-list div { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--borde); }
-        .autocomplete-list div:hover { background-color: var(--color-primario); color: #000; }
+        .autocomplete-list div { 
+            padding: 12px 15px; 
+            cursor: pointer; 
+            border-bottom: 1px solid var(--borde); 
+            color: var(--texto-principal);
+            transition: background-color 0.2s;
+        }
+        .autocomplete-list div:last-child { border-bottom: none; }
+        .autocomplete-list div:hover { 
+            background-color: var(--color-primario); 
+            color: #ffffff; 
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     
     <main>
         <section>
-            <h2>Auditoría de Ventas</h2>
+            <h2 style="font-size: 2em; margin-bottom: 5px;">Auditoría de Ventas</h2>
+            <p style="color: var(--texto-secundario); margin-bottom: 25px;">Consulta el registro histórico de las transacciones realizadas en caja.</p>
             
-            <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
+            <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 25px;">
                 <div class="autocomplete-container" style="flex-grow: 1;">
                     <label for="input-buscar-vendedor">Filtrar por Vendedor (Nombre o Username):</label>
                     <input type="text" id="input-buscar-vendedor" placeholder="Escribe para buscar empleado..." autocomplete="off">
@@ -29,10 +43,14 @@
                     <input type="hidden" id="vendedor-id-seleccionado"> <!-- Aquí guardaremos el ID real para el backend -->
                 </div>
                 
-                <button id="btn-filtrar-ventas">Aplicar Filtro</button>
+                <!-- Le agregamos white-space: nowrap para que no salte de línea y un icono -->
+                <button id="btn-filtrar-ventas" style="white-space: nowrap; padding: 12px 20px;">
+                    🔍 Aplicar Filtro
+                </button>
             </div>
 
-            <table border="1">
+            <!-- Tabla sin border="1" para que herede tu diseño premium -->
+            <table>
                 <thead>
                     <tr>
                         <th>ID Venta</th>
@@ -52,6 +70,7 @@
 
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/inventario.js"></script>
+    <!-- Corregido: Antes llamaba a inventario.js -->
+    <script src="js/historial.js"></script> 
 </body>
 </html>
