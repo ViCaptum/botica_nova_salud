@@ -1,23 +1,25 @@
+// Referencias al DOM
 const tbodyProductos = document.getElementById('tabla-productos-body');
-const btnBuscarInv = document.getElementById('btn-buscar');
 const selectTipo = document.getElementById('select-tipo');
 const inputBuscarInv = document.getElementById('input-buscar');
 
-// Elementos del formulario ADMIN
+// Referencias del Modal ADMIN
 const btnNuevo = document.getElementById('btn-nuevo-producto');
-const seccionFormulario = document.getElementById('seccion-formulario-producto');
+const modalProducto = document.getElementById('modal-producto');
 const formProducto = document.getElementById('form-producto');
 const tituloFormulario = document.getElementById('titulo-formulario');
 
-// Obtenemos el usuario de la sesión actual
+// Obtenemos el usuario de la sesión
 const usuario = JSON.parse(localStorage.getItem('usuario_botica') || '{}');
 const esAdmin = usuario.rol === 1;
 
-// Si es Admin, revelamos el botón de crear producto
 if (esAdmin && btnNuevo) {
     btnNuevo.style.display = 'inline-block';
 }
 
+// ==========================================
+// 1. CARGA DE DATOS Y RENDERIZADO
+// ==========================================
 async function cargarInventarioCompleto() {
     const buscar = inputBuscarInv.value.trim();
     const tipo = selectTipo.value;
@@ -37,18 +39,21 @@ async function cargarInventarioCompleto() {
 function renderizarTablaInventario(productos) {
     tbodyProductos.innerHTML = '';
     
+    if (productos.length === 0) {
+        tbodyProductos.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No se encontraron productos.</td></tr>';
+        return;
+    }
+
     productos.forEach(prod => {
         const tr = document.createElement('tr');
         
         let botonesAccion = '';
         if (esAdmin) {
-            // Pasamos todo el objeto producto convertido a texto para usarlo en la función de editar
             const prodData = encodeURIComponent(JSON.stringify(prod));
-            
             botonesAccion = `
                 <div style="display: flex; gap: 5px;">
-                    <button onclick="editarProducto('${prodData}')" style="background-color: var(--color-primario); color: black; padding: 5px 10px; font-size: 0.9em;">✏️ Editar</button>
-                    <button onclick="eliminarProducto(${prod.id_producto})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 5px 10px; font-size: 0.9em;">🗑️</button>
+                    <button onclick="editarProducto('${prodData}')" style="background-color: var(--color-primario); color: black; padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">✏️ Editar</button>
+                    <button onclick="eliminarProducto(${prod.id_producto})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">🗑️</button>
                 </div>
             `;
         } else {
@@ -56,12 +61,12 @@ function renderizarTablaInventario(productos) {
         }
 
         tr.innerHTML = `
-            <td>${prod.codigo_barras || '-'}</td>
-            <td>${prod.nombre_producto}</td>
-            <td>${prod.categoria || '-'}</td>
-            <td>${prod.laboratorio || '-'}</td>
+            <td style="font-family: monospace; color: var(--texto-secundario);">${prod.codigo_barras || '-'}</td>
+            <td style="font-weight: 500;">${prod.nombre_producto}</td>
+            <td>${prod.nombre_categoria || prod.categoria || '-'}</td>
+            <td>${prod.nombre_laboratorio || prod.laboratorio || '-'}</td>
             <td>${prod.es_generico ? 'Genérico' : 'Marca'}</td>
-            <td>S/ ${prod.precio_venta}</td>
+            <td style="font-weight: bold; color: var(--color-primario);">S/ ${parseFloat(prod.precio_venta).toFixed(2)}</td>
             <td style="${prod.stock_actual <= (prod.stock_minimo || 5) ? 'color: var(--error); font-weight: bold;' : ''}">${prod.stock_actual}</td>
             <td>${botonesAccion}</td>
         `;
@@ -69,35 +74,45 @@ function renderizarTablaInventario(productos) {
     });
 }
 
-// LÓGICA DE ADMINISTRADOR (Crear, Editar, Eliminar)
+// ==========================================
+// 2. BÚSQUEDA REACTIVA (Sin presionar botones)
+// ==========================================
+// Busca al cambiar la opción del combobox
+selectTipo.addEventListener('change', cargarInventarioCompleto);
+
+// Busca al escribir en el input (Debounce simple recomendado para producción)
+inputBuscarInv.addEventListener('input', cargarInventarioCompleto);
+
+// ==========================================
+// 3. LÓGICA DE ADMINISTRADOR (Modales)
+// ==========================================
+function abrirModal() {
+    modalProducto.style.display = 'flex'; // Usamos flex para que el centrado CSS funcione
+}
+
+function cerrarModal() {
+    modalProducto.style.display = 'none';
+}
+
 if (btnNuevo) {
     btnNuevo.addEventListener('click', () => {
-        seccionFormulario.style.display = 'block';
         formProducto.reset();
-        document.getElementById('prod-id').value = ''; // ID vacío = CREAR
+        document.getElementById('prod-id').value = ''; 
         tituloFormulario.textContent = "Nuevo Producto";
-        // Hacemos scroll suave hacia el formulario
-        seccionFormulario.scrollIntoView({ behavior: 'smooth' });
+        abrirModal();
     });
 }
 
-document.getElementById('btn-cancelar-producto').addEventListener('click', () => {
-    seccionFormulario.style.display = 'none';
-});
+document.getElementById('btn-cancelar-producto').addEventListener('click', cerrarModal);
 
-// Función para preparar el formulario en modo EDICIÓN
 window.editarProducto = function(productoEncoded) {
     const prod = JSON.parse(decodeURIComponent(productoEncoded));
     
-    seccionFormulario.style.display = 'block';
     tituloFormulario.textContent = `Editar: ${prod.nombre_producto}`;
-    
     document.getElementById('prod-id').value = prod.id_producto;
     
-    // IMPORTANTE: Asignar los IDs a los selectores
     document.getElementById('prod-categoria').value = prod.id_categoria || '';
     document.getElementById('prod-laboratorio').value = prod.id_laboratorio || '';
-    
     document.getElementById('prod-codigo').value = prod.codigo_barras || '';
     document.getElementById('prod-nombre').value = prod.nombre_producto;
     document.getElementById('prod-generico').value = prod.es_generico;
@@ -105,12 +120,11 @@ window.editarProducto = function(productoEncoded) {
     document.getElementById('prod-stock').value = prod.stock_actual;
     document.getElementById('prod-minimo').value = prod.stock_minimo || 5;
 
-    seccionFormulario.scrollIntoView({ behavior: 'smooth' });
+    abrirModal();
 };
 
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const idProducto = document.getElementById('prod-id').value;
     
     const payload = {
@@ -126,16 +140,14 @@ formProducto.addEventListener('submit', async (e) => {
 
     try {
         if (idProducto) {
-            // MODO EDICIÓN: Hacemos un PUT a la ruta específica
             await API.put(`/inventario/${idProducto}`, payload);
             alert("Producto actualizado correctamente.");
         } else {
-            // MODO CREACIÓN: Hacemos un POST general
             await API.post('/inventario', payload);
             alert("Producto guardado exitosamente.");
         }
         
-        seccionFormulario.style.display = 'none';
+        cerrarModal();
         cargarInventarioCompleto(); 
     } catch (error) {
         alert("Error al guardar: " + error.message);
@@ -153,16 +165,11 @@ window.eliminarProducto = async function(id) {
     }
 };
 
-// Eventos de carga
-btnBuscarInv.addEventListener('click', cargarInventarioCompleto);
-inputBuscarInv.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') cargarInventarioCompleto();
-});
-document.addEventListener('DOMContentLoaded', cargarInventarioCompleto);
-
+// ==========================================
+// 4. INICIALIZACIÓN Y CATÁLOGOS
+// ==========================================
 async function cargarCatalogosFormulario() {
     try {
-        // Obtenemos los datos de las nuevas rutas que crearás en el backend
         const [categorias, laboratorios] = await Promise.all([
             API.get('/categorias'),
             API.get('/laboratorios')
@@ -171,25 +178,18 @@ async function cargarCatalogosFormulario() {
         const selectCat = document.getElementById('prod-categoria');
         const selectLab = document.getElementById('prod-laboratorio');
 
-        // Llenamos Categorías
         selectCat.innerHTML = '<option value="">Seleccione una categoría</option>';
-        categorias.forEach(cat => {
-            selectCat.innerHTML += `<option value="${cat.id_categoria}">${cat.nombre_categoria}</option>`;
-        });
+        categorias.forEach(cat => { selectCat.innerHTML += `<option value="${cat.id_categoria}">${cat.nombre_categoria}</option>`; });
 
-        // Llenamos Laboratorios
         selectLab.innerHTML = '<option value="">Seleccione un laboratorio</option>';
-        laboratorios.forEach(lab => {
-            selectLab.innerHTML += `<option value="${lab.id_laboratorio}">${lab.nombre_laboratorio}</option>`;
-        });
+        laboratorios.forEach(lab => { selectLab.innerHTML += `<option value="${lab.id_laboratorio}">${lab.nombre_laboratorio}</option>`; });
 
     } catch (error) {
         console.error("Error cargando catálogos para el formulario:", error);
     }
 }
 
-// Llamamos a esta función al iniciar la página
 document.addEventListener('DOMContentLoaded', () => {
     cargarInventarioCompleto();
-    cargarCatalogosFormulario(); // Nueva función
+    cargarCatalogosFormulario();
 });

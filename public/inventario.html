@@ -16,13 +16,14 @@
                 <option value="generico">Solo Genéricos</option>
                 <option value="marca">Solo De Marca</option>
             </select>
-            <button id="btn-buscar">Buscar</button>
+            <!-- El botón de buscar queda solo como respaldo visual, la búsqueda será automática -->
+            <button id="btn-buscar" style="display: none;">Buscar</button>
             <button id="btn-nuevo-producto" style="display: none;">+ Nuevo Producto</button>
         </section>
 
         <!-- Tabla de Resultados -->
         <section>
-            <table border="1">
+            <table>
                 <thead>
                     <tr>
                         <th>Código</th>
@@ -36,49 +37,67 @@
                     </tr>
                 </thead>
                 <tbody id="tabla-productos-body">
-                    <!-- JavaScript inyectará las filas (<tr>) aquí -->
+                    <!-- JavaScript inyectará las filas aquí -->
                 </tbody>
             </table>
         </section>
 
-        <!-- Formulario Oculto para Crear/Editar (Modal crudo) -->
-        <section id="seccion-formulario-producto" style="display: none;">
-            <h2 id="titulo-formulario">Nuevo Producto</h2>
-            <form id="form-producto">
-                <input type="hidden" id="prod-id"> <!-- ID oculto para saber si actualizamos o creamos -->
+        <!-- MODAL FLOTANTE PARA CREAR/EDITAR -->
+        <div id="modal-producto" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h2 id="titulo-formulario" style="margin-bottom: 20px; color: var(--color-primario);">Nuevo Producto</h2>
                 
-                <!-- En un proyecto real, las categorías y laboratorios se traerían con otro fetch a sus propias tablas -->
-                <label>Categoría: 
-                    <select id="prod-categoria" required>
-                        <option value="">Cargando categorías...</option>
-                    </select>
-                </label><br>
-
-                <label>Laboratorio: 
-                    <select id="prod-laboratorio" required>
-                        <option value="">Cargando laboratorios...</option>
-                    </select>
-                </label><br>
-                <label>Código de Barras: <input type="text" id="prod-codigo"></label><br>
-                <label>Nombre: <input type="text" id="prod-nombre" required></label><br>
-                <label>Es Genérico: 
-                    <select id="prod-generico">
-                        <option value="1">Sí (Genérico)</option>
-                        <option value="0">No (De Marca)</option>
-                    </select>
-                </label><br>
-                <label>Precio: <input type="number" step="0.01" id="prod-precio" required></label><br>
-                <label>Stock Actual: <input type="number" id="prod-stock" required></label><br>
-                <label>Stock Mínimo: <input type="number" id="prod-minimo" required></label><br>
-                
-                <button type="submit">Guardar Producto</button>
-                <button type="button" id="btn-cancelar-producto">Cancelar</button>
-            </form>
-        </section>
+                <form id="form-producto" class="form-grid">
+                    <input type="hidden" id="prod-id">
+                    
+                    <div>
+                        <label for="prod-categoria">Categoría:</label>
+                        <select id="prod-categoria" required><option value="">Cargando...</option></select>
+                    </div>
+                    <div>
+                        <label for="prod-laboratorio">Laboratorio:</label>
+                        <select id="prod-laboratorio" required><option value="">Cargando...</option></select>
+                    </div>
+                    <div>
+                        <label for="prod-codigo">Código de Barras:</label>
+                        <input type="text" id="prod-codigo">
+                    </div>
+                    <div>
+                        <label for="prod-nombre">Nombre del Producto:</label>
+                        <input type="text" id="prod-nombre" required>
+                    </div>
+                    <div>
+                        <label for="prod-generico">Tipo de Medicamento:</label>
+                        <select id="prod-generico">
+                            <option value="1">Genérico</option>
+                            <option value="0">De Marca</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="prod-precio">Precio de Venta (S/):</label>
+                        <input type="number" step="0.01" id="prod-precio" required>
+                    </div>
+                    <div>
+                        <label for="prod-stock">Stock Actual:</label>
+                        <input type="number" id="prod-stock" required>
+                    </div>
+                    <div>
+                        <label for="prod-minimo">Stock Mínimo (Alerta):</label>
+                        <input type="number" id="prod-minimo" required>
+                    </div>
+                    
+                    <!-- Botones de Acción ocupando el ancho completo -->
+                    <div class="form-full-width" style="display: flex; gap: 15px; margin-top: 15px;">
+                        <button type="submit" style="flex-grow: 1;">💾 Guardar Producto</button>
+                        <button type="button" id="btn-cancelar-producto" style="background-color: transparent; border: 1px solid var(--borde); color: var(--texto-principal);">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/inventario.js"></script> <!-- o ventas.js -->
+    <script src="js/inventario.js"></script>
 </body>
 </html>

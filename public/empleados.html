@@ -4,53 +4,150 @@
     <meta charset="UTF-8">
     <title>Gestión de Empleados - Botica Nova Salud</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .seccion-formulario {
+            background-color: var(--bg-fondo);
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .seccion-formulario h3 {
+            color: var(--color-primario);
+            font-size: 1.1em;
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--borde);
+        }
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr; 
+            gap: 25px;
+            align-items: start;
+        }
+        @media (max-width: 1024px) {
+            .admin-layout { grid-template-columns: 1fr; } 
+        }
+    </style>
 </head>
 <body>
 
-    <main>
-        <section>
-            <h2>Registrar Nuevo Empleado</h2>
+    <!-- MODAL DE DETALLES Y EDICIÓN (ADMIN) CORREGIDO -->
+    <div id="modal-editar-emp" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="color: var(--color-primario); margin-bottom: 20px;">📋 Detalles del Empleado</h2>
             
-            <form id="form-registro" class="form-grid">
+            <!-- ID CORREGIDO PARA EVITAR DUPLICIDAD -->
+            <form id="form-editar-emp" class="form-grid">
+                <input type="hidden" id="edit-id">
+                
                 <div>
-                    <label for="reg-nombre">Nombres:</label>
-                    <input type="text" id="reg-nombre" required>
+                    <label>Nombres:</label>
+                    <input type="text" id="edit-nombre" required>
                 </div>
                 <div>
-                    <label for="reg-apellidos">Apellidos:</label>
-                    <input type="text" id="reg-apellidos" required>
+                    <label>Apellidos:</label>
+                    <input type="text" id="edit-apellidos" required>
                 </div>
                 <div>
-                    <label for="reg-correo">Correo Electrónico:</label>
-                    <input type="email" id="reg-correo" required>
+                    <label>Teléfono:</label>
+                    <input type="text" id="edit-telefono">
                 </div>
                 <div>
-                    <label for="reg-telefono">Teléfono:</label>
-                    <input type="text" id="reg-telefono">
-                </div>
-                <div>
-                    <label for="reg-rol">Rol del Empleado:</label>
-                    <select id="reg-rol">
+                    <label>Rol en el Sistema:</label>
+                    <select id="edit-rol">
+                        <option value="2">Vendedor</option>
                         <option value="1">Administrador</option>
-                        <option value="2" selected>Vendedor / Cajero</option>
                     </select>
-                </div>
-                <div>
-                    <label for="reg-username">Nombre de Usuario (Login):</label>
-                    <input type="text" id="reg-username" required>
-                </div>
-                <div>
-                    <label for="reg-password">Contraseña temporal:</label>
-                    <input type="password" id="reg-password" required>
                 </div>
                 
                 <div class="form-full-width">
-                    <p id="msg-error-registro" style="color: var(--error); display: none;"></p>
-                    <p id="msg-exito-registro" style="color: var(--exito); display: none;"></p>
-                    <button type="submit" style="width: 100%; margin-top: 10px;">Crear Cuenta de Empleado</button>
+                    <p style="font-size: 0.85em; color: var(--texto-secundario); background: var(--bg-input); padding: 10px; border-radius: 6px; border: 1px dashed var(--borde);">
+                        🔒 <strong>Nota:</strong> El correo y la contraseña solo los cambia el empleado en su Perfil.
+                    </p>
+                </div>
+                
+                <div class="form-full-width" style="display: flex; gap: 15px; margin-top: 15px;">
+                    <button type="submit" style="flex-grow: 1;">💾 Guardar Cambios</button>
+                    <button type="button" onclick="document.getElementById('modal-editar-emp').style.display='none'" style="background-color: transparent; border: 1px solid var(--borde); color: var(--texto-principal);">Cancelar</button>
                 </div>
             </form>
-        </section>
+        </div>
+    </div>
+
+    <main>
+        <div style="margin-bottom: 25px;">
+            <h2 style="font-size: 2.2em; margin-bottom: 5px;">Gestión de Personal</h2>
+            <p style="color: var(--texto-secundario);">Registra nuevos colaboradores y administra el directorio del equipo.</p>
+        </div>
+
+        <div class="admin-layout">
+            <!-- COLUMNA IZQ: FORMULARIO COMPACTO -->
+            <section style="padding: 15px; margin: 0; max-height: 90vh; overflow-y: auto;">
+                <h3 style="margin-bottom: 15px; font-size: 1.1em;">➕ Alta de Personal</h3>
+                <form id="form-registro">
+                    
+                    <!-- Información Personal Agrupada -->
+                    <div class="seccion-formulario" style="padding: 12px; margin-bottom: 12px;">
+                        <h3 style="font-size: 0.95em; margin-bottom: 10px;">👤 Info. Personal</h3>
+                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;"> 
+                            <input type="text" id="reg-nombre" placeholder="Nombres" required style="padding: 8px;">
+                            <input type="text" id="reg-apellidos" placeholder="Apellidos" required style="padding: 8px;">
+                            <div style="grid-column: 1 / -1;">
+                                <input type="email" id="reg-correo" placeholder="Correo Electrónico" required style="padding: 8px;">
+                            </div>
+                            <div style="grid-column: 1 / -1;">
+                                <input type="text" id="reg-telefono" placeholder="Teléfono (Opcional)" style="padding: 8px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acceso Automatizado -->
+                    <div class="seccion-formulario" style="padding: 12px; margin-bottom: 12px;">
+                        <h3 style="font-size: 0.95em; margin-bottom: 10px;">🔐 Acceso</h3>
+                        <select id="reg-rol" style="padding: 8px; margin-bottom: 8px; cursor: pointer;">
+                            <option value="2" selected>Vendedor (Caja e Inv.)</option>
+                            <option value="1">Administrador (Total)</option>
+                        </select>
+                        <div style="background-color: var(--bg-input); padding: 8px; border-radius: 6px; border: 1px dashed var(--color-primario); text-align: center;">
+                            <p style="color: var(--texto-secundario); font-size: 0.75em; margin: 0;">Credenciales automáticas 🤖</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenedores de mensajes más pequeños -->
+                    <div id="msg-error-registro" style="color: var(--error); display: none; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
+                    <div id="msg-exito-registro" style="color: var(--exito); display: none; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--color-primario); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
+                    
+                    <button type="submit" style="width: 100%; padding: 10px; font-size: 0.95em;">Registrar Empleado</button>
+                </form>
+            </section>
+
+            <!-- COLUMNA DER: DIRECTORIO (TABLA) -->
+            <section style="padding: 25px; margin: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <h3 style="margin: 0; color: var(--color-primario);">👥 Directorio</h3>
+                    <input type="text" id="input-buscar-emp" placeholder="Buscar empleado..." style="max-width: 300px;">
+                </div>
+                
+                <div style="max-height: 700px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 8px;">
+                    <table style="margin-top: 0; border: none; min-width: 600px;">
+                        <thead style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Rol</th>
+                                <th>Contacto</th>
+                                <th>Usuario</th>
+                                <th style="text-align: center;">Acciones</th> <!-- NUEVA COLUMNA -->
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-empleados-body">
+                            <!-- JS inyecta la lista aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </main>
 
     <script src="js/auth.js"></script>

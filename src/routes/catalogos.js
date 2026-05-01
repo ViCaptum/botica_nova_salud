@@ -66,4 +66,36 @@ router.post('/laboratorios', auth, validarRol([ROLES.ADMIN]), async (req, res) =
     }
 });
 
+// DELETE: Eliminar categoría (SOLO ADMIN)[cite: 27]
+router.delete('/categorias/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [resultado] = await pool.query('DELETE FROM CATEGORIAS WHERE id_categoria = ?', [id]);
+        
+        if (resultado.affectedRows === 0) return res.status(404).json({ error: 'Categoría no encontrada' });
+        res.json({ mensaje: 'Categoría eliminada' });
+    } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ error: 'No se puede eliminar: existen productos usando esta categoría' });
+        }
+        res.status(500).json({ error: 'Error al eliminar categoría' });
+    }
+});
+
+// DELETE: Eliminar laboratorio (SOLO ADMIN)[cite: 27]
+router.delete('/laboratorios/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [resultado] = await pool.query('DELETE FROM LABORATORIOS WHERE id_laboratorio = ?', [id]);
+        
+        if (resultado.affectedRows === 0) return res.status(404).json({ error: 'Laboratorio no encontrado' });
+        res.json({ mensaje: 'Laboratorio eliminado' });
+    } catch (error) {
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(400).json({ error: 'No se puede eliminar: existen productos usando este laboratorio' });
+        }
+        res.status(500).json({ error: 'Error al eliminar laboratorio' });
+    }
+});
+
 module.exports = router;

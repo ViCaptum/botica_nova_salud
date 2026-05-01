@@ -1,58 +1,65 @@
 // ==========================================
-// ESTADO GLOBAL DE LA VENTA
+// ESTADO GLOBAL DE LA VENTA Y CACHÉ
 // ==========================================
-let carrito = []; 
-let totalVenta = 0.00;
+let inventarioGlobal = []; // Caché de productos
+let carrito = [];          // Items que el cliente quiere comprar
+let totalVenta = 0.00;     // Dinero total
 
 // ==========================================
-// LÓGICA DEL CLIENTE (Buscar y Registrar)
+// REFERENCIAS AL DOM (UI)
 // ==========================================
+const gridProductos = document.getElementById('grid-productos-venta');
+const inputBuscarProd = document.getElementById('input-buscar-prod-venta');
+const contenedorCarrito = document.getElementById('contenedor-items-carrito');
+const lblTotalVenta = document.getElementById('lbl-total-venta');
+const btnProcesarVenta = document.getElementById('btn-procesar-venta');
+
+// Referencias Cliente
 const btnBuscarCliente = document.getElementById('btn-buscar-cliente');
 const inputDni = document.getElementById('input-dni');
 const lblNombreCliente = document.getElementById('lbl-nombre-cliente');
 const hiddenClienteId = document.getElementById('cliente-id-seleccionado');
 const seccionNuevoCliente = document.getElementById('seccion-nuevo-cliente');
 
+// ==========================================
+// 1. LÓGICA DEL CLIENTE (Búsqueda y Registro Rápido)
+// ==========================================
 btnBuscarCliente.addEventListener('click', async () => {
     const dni = inputDni.value.trim();
     if (dni.length === 0) return;
 
     try {
+        // Llama a tu API de buscar cliente (GET /api/clientes/buscar/:dni)[cite: 33]
         const cliente = await API.get(`/clientes/buscar/${dni}`);
         
-        // Si lo encuentra
         lblNombreCliente.textContent = `${cliente.nombres} ${cliente.apellidos}`;
         lblNombreCliente.style.color = "var(--color-primario)";
         hiddenClienteId.value = cliente.id_cliente; 
         seccionNuevoCliente.style.display = 'none'; 
         
     } catch (error) {
-        // CORRECCIÓN AQUÍ: Capturamos cualquier error (incluyendo el 404 de tu API)
+        // Si hay error 404, mostramos el mini-formulario[cite: 33]
         lblNombreCliente.textContent = "DNI no registrado";
         lblNombreCliente.style.color = "var(--texto-secundario)";
         hiddenClienteId.value = "";
-        
-        // Mostramos la ventana flotante (mini-formulario)
         seccionNuevoCliente.style.display = 'block';
     }
 });
 
-// Ocultar formulario de cliente nuevo si se cancela
 document.getElementById('btn-cancelar-cliente').addEventListener('click', () => {
-    document.getElementById('seccion-nuevo-cliente').style.display = 'none';
-    document.getElementById('input-dni').value = '';
-    document.getElementById('lbl-nombre-cliente').textContent = "Público General";
-    document.getElementById('lbl-nombre-cliente').style.color = "var(--color-primario)";
+    seccionNuevoCliente.style.display = 'none';
+    inputDni.value = '';
+    lblNombreCliente.textContent = "Público General";
+    lblNombreCliente.style.color = "var(--color-primario)";
 });
 
-// Guardar cliente rápido
 document.getElementById('btn-guardar-cliente-rapido').addEventListener('click', async () => {
     const dni = inputDni.value.trim();
     const nombres = document.getElementById('nuevo-cli-nombres').value.trim();
     const apellidos = document.getElementById('nuevo-cli-apellidos').value.trim();
 
     if (!nombres || !apellidos) {
-        alert("Nombres y apellidos son obligatorios para crear el cliente rápido.");
+        alert("Nombres y apellidos son obligatorios.");
         return;
     }
 
@@ -60,7 +67,7 @@ document.getElementById('btn-guardar-cliente-rapido').addEventListener('click', 
         const nuevoCliente = { dni, nombres, apellidos, telefono: null, correo: null };
         const response = await API.post('/clientes', nuevoCliente);
 
-        alert("¡Cliente registrado exitosamente! Ya está seleccionado para la venta.");
+        alert("¡Cliente registrado exitosamente!");
         lblNombreCliente.textContent = `${nombres} ${apellidos}`;
         lblNombreCliente.style.color = "var(--color-primario)";
         hiddenClienteId.value = response.id_cliente; 
@@ -72,151 +79,139 @@ document.getElementById('btn-guardar-cliente-rapido').addEventListener('click', 
 });
 
 // ==========================================
-// BUSCADOR DE PRODUCTOS PARA EL CARRITO
+// 2. CARGAR Y MOSTRAR CATÁLOGO DE PRODUCTOS (GRILLA)
 // ==========================================
-const inputBuscarProd = document.getElementById('input-buscar-prod-venta');
-const btnBuscarProd = document.getElementById('btn-buscar-prod-venta');
-const selectResultados = document.getElementById('select-resultados-prod');
-const inputCantidad = document.getElementById('input-cantidad-venta');
-const btnAgregarCarrito = document.getElementById('btn-agregar-carrito');
-const tbodyCarrito = document.getElementById('tabla-carrito-body');
-const lblTotalVenta = document.getElementById('lbl-total-venta');
-const btnProcesarVenta = document.getElementById('btn-procesar-venta');
-
-btnBuscarProd.addEventListener('click', async () => {
-    const termino = inputBuscarProd.value.trim();
-    if (termino.length === 0) {
-        alert("Ingresa un nombre o código para buscar.");
-        return;
-    }
-
+async function cargarCatalogoParaVenta() {
     try {
-        const productos = await API.get(`/inventario?buscar=${encodeURIComponent(termino)}`);
-        
-        selectResultados.innerHTML = ''; 
-        
-        if (productos.length === 0) {
-            selectResultados.style.display = 'none';
-            alert("No se encontró ningún medicamento con ese nombre o código.");
-            return;
-        }
-
-        productos.forEach(prod => {
-            const option = document.createElement('option');
-            // Almacenamos toda la data del producto en el valor del select
-            option.value = JSON.stringify(prod); 
-            option.textContent = `${prod.nombre_producto} - S/ ${prod.precio_venta} (Stock: ${prod.stock_actual})`;
-            
-            if (prod.stock_actual <= 0) {
-                option.disabled = true;
-                option.textContent += " [AGOTADO]";
-            }
-            selectResultados.appendChild(option);
-        });
-
-        // Hacemos visible el select de resultados
-        selectResultados.style.display = 'inline-block'; 
-        selectResultados.style.width = '100%';
-        selectResultados.style.marginTop = '10px';
-
+        inventarioGlobal = await API.get('/inventario');
+        renderizarGridProductos(inventarioGlobal);
     } catch (error) {
-        alert("Error al buscar el producto.");
+        console.error("Error al cargar inventario", error);
     }
+}
+
+function renderizarGridProductos(productos) {
+    gridProductos.innerHTML = '';
+    
+    productos.forEach(prod => {
+        const div = document.createElement('div');
+        div.className = 'product-card';
+        
+        const sinStock = prod.stock_actual <= 0;
+        
+        div.innerHTML = `
+            <div>
+                <h4>${prod.nombre_producto}</h4>
+                <p style="font-size: 0.8em; color: var(--texto-secundario);">${prod.codigo_barras || 'N/A'}</p>
+            </div>
+            <div class="price">S/ ${parseFloat(prod.precio_venta).toFixed(2)}</div>
+            <div class="stock" style="color: ${sinStock ? 'var(--error)' : 'var(--texto-secundario)'}">
+                Stock: ${prod.stock_actual}
+            </div>
+            <button onclick="agregarAlCarrito(${prod.id_producto})" ${sinStock ? 'disabled' : ''} style="width: 100%; padding: 8px;">
+                ${sinStock ? 'Agotado' : '🛒 Agregar'}
+            </button>
+        `;
+        gridProductos.appendChild(div);
+    });
+}
+
+// Filtro instantáneo al escribir
+inputBuscarProd.addEventListener('input', (e) => {
+    const texto = e.target.value.toLowerCase().trim();
+    const filtrados = inventarioGlobal.filter(p => 
+        p.nombre_producto.toLowerCase().includes(texto) || 
+        (p.codigo_barras && p.codigo_barras.includes(texto))
+    );
+    renderizarGridProductos(filtrados);
 });
 
 // ==========================================
-// AGREGAR AL CARRITO
+// 3. LÓGICA DEL CARRITO INTERACTIVO
 // ==========================================
-btnAgregarCarrito.addEventListener('click', () => {
-    if (selectResultados.style.display === 'none' || !selectResultados.value) {
-        alert("Primero debes buscar y seleccionar un producto de la lista.");
-        return;
-    }
-
-    const cantidadRequerida = parseInt(inputCantidad.value);
-    if (isNaN(cantidadRequerida) || cantidadRequerida <= 0) {
-        alert("La cantidad debe ser 1 o mayor.");
-        return;
-    }
-
-    // Parseamos el JSON oculto en el value del select
-    const productoSeleccionado = JSON.parse(selectResultados.value);
-
-    // Revisamos si ya metimos este producto al carrito antes en esta misma venta
-    const productoExistente = carrito.find(item => item.id_producto === productoSeleccionado.id_producto);
-    const cantidadYaEnCarrito = productoExistente ? productoExistente.cantidad : 0;
-
-    // Validación crítica: ¡No vender más de lo que hay en almacén!
-    if ((cantidadYaEnCarrito + cantidadRequerida) > productoSeleccionado.stock_actual) {
-        alert(`¡Alerta de Stock! Solo quedan ${productoSeleccionado.stock_actual} unidades disponibles de ${productoSeleccionado.nombre_producto}.`);
-        return;
-    }
-
-    // Agregamos o actualizamos
-    if (productoExistente) {
-        productoExistente.cantidad += cantidadRequerida;
-        productoExistente.subtotal = productoExistente.cantidad * productoExistente.precio_unitario;
+window.agregarAlCarrito = function(idProducto) {
+    const productoDB = inventarioGlobal.find(p => p.id_producto === idProducto);
+    const itemExistente = carrito.find(item => item.id_producto === idProducto);
+    
+    if (itemExistente) {
+        if (itemExistente.cantidad < productoDB.stock_actual) {
+            itemExistente.cantidad++;
+            itemExistente.subtotal = itemExistente.cantidad * itemExistente.precio_unitario;
+        } else {
+            alert("No hay suficiente stock de este producto.");
+        }
     } else {
         carrito.push({
-            id_producto: productoSeleccionado.id_producto,
-            nombre: productoSeleccionado.nombre_producto,
-            precio_unitario: productoSeleccionado.precio_venta,
-            cantidad: cantidadRequerida,
-            subtotal: cantidadRequerida * productoSeleccionado.precio_venta
+            id_producto: productoDB.id_producto,
+            nombre: productoDB.nombre_producto,
+            precio_unitario: parseFloat(productoDB.precio_venta),
+            cantidad: 1,
+            subtotal: parseFloat(productoDB.precio_venta)
         });
     }
+    renderizarCarritoUI();
+};
 
-    renderizarCarrito();
-    
-    // Limpiamos la búsqueda para agilizar el trabajo del cajero
-    inputBuscarProd.value = '';
-    selectResultados.style.display = 'none';
-    inputCantidad.value = 1;
-    inputBuscarProd.focus(); // Devolvemos el cursor al buscador
-});
-
-// ==========================================
-// DIBUJAR LA TABLA Y CALCULAR EL TOTAL
-// ==========================================
-function renderizarCarrito() {
-    tbodyCarrito.innerHTML = '';
+function renderizarCarritoUI() {
+    contenedorCarrito.innerHTML = '';
     totalVenta = 0;
 
     if (carrito.length === 0) {
+        contenedorCarrito.innerHTML = '<div class="cart-empty-msg">El carrito está vacío</div>';
         btnProcesarVenta.disabled = true;
-        lblTotalVenta.textContent = "0.00";
+        lblTotalVenta.textContent = '0.00';
         return;
     }
 
     carrito.forEach((item, index) => {
-        totalVenta += parseFloat(item.subtotal);
-        const tr = document.createElement('tr');
-        
-        tr.innerHTML = `
-            <td>${item.nombre}</td>
-            <td>S/ ${parseFloat(item.precio_unitario).toFixed(2)}</td>
-            <td style="text-align: center; font-weight: bold;">${item.cantidad}</td>
-            <td style="color: var(--color-primario); font-weight: bold;">S/ ${parseFloat(item.subtotal).toFixed(2)}</td>
-            <td style="text-align: center;">
-                <button onclick="quitarDelCarrito(${index})" style="background-color: var(--bg-fondo); border: 1px solid var(--error); color: var(--error); padding: 5px 10px; border-radius: 4px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='var(--error)'; this.style.color='white'" onmouseout="this.style.backgroundColor='var(--bg-fondo)'; this.style.color='var(--error)'">
-                    X
-                </button>
-            </td>
+        totalVenta += item.subtotal;
+
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+            <div class="cart-item-header">
+                <span>${item.nombre}</span>
+                <span>S/ ${item.subtotal.toFixed(2)}</span>
+            </div>
+            <div class="cart-item-controls">
+                <div>
+                    <span style="color: var(--texto-secundario); margin-right: 5px;">S/ ${item.precio_unitario.toFixed(2)} x </span>
+                    <button onclick="cambiarCantidad(${index}, -1)" style="padding: 2px 8px; cursor: pointer;">-</button>
+                    <span style="margin: 0 10px; font-weight: bold;">${item.cantidad}</span>
+                    <button onclick="cambiarCantidad(${index}, 1)" style="padding: 2px 8px; cursor: pointer;">+</button>
+                </div>
+                <button class="btn-quitar" onclick="quitarDelCarrito(${index})">🗑️</button>
+            </div>
         `;
-        tbodyCarrito.appendChild(tr);
+        contenedorCarrito.appendChild(div);
     });
 
     lblTotalVenta.textContent = totalVenta.toFixed(2);
     btnProcesarVenta.disabled = false;
 }
 
+window.cambiarCantidad = function(index, delta) {
+    const item = carrito[index];
+    const productoDB = inventarioGlobal.find(p => p.id_producto === item.id_producto);
+    
+    const nuevaCantidad = item.cantidad + delta;
+    
+    if (nuevaCantidad > 0 && nuevaCantidad <= productoDB.stock_actual) {
+        item.cantidad = nuevaCantidad;
+        item.subtotal = item.cantidad * item.precio_unitario;
+    } else if (nuevaCantidad > productoDB.stock_actual) {
+        alert("Límite de stock alcanzado.");
+    }
+    renderizarCarritoUI();
+};
+
 window.quitarDelCarrito = function(index) {
     carrito.splice(index, 1);
-    renderizarCarrito();
+    renderizarCarritoUI();
 };
 
 // ==========================================
-// CONFIRMAR Y PROCESAR LA VENTA
+// 4. PROCESAR VENTA FINAL (Conexión Backend)
 // ==========================================
 btnProcesarVenta.addEventListener('click', async () => {
     if (carrito.length === 0) return;
@@ -225,11 +220,16 @@ btnProcesarVenta.addEventListener('click', async () => {
         return;
     }
 
-    // Armamos el payload que tu API /routes/ventas.js está esperando
+    // Armamos el payload EXACTO que espera tu backend (POST /api/ventas)[cite: 33]
     const payloadVenta = {
         id_cliente: hiddenClienteId.value || null, 
         total_venta: totalVenta,
-        detalles: carrito
+        detalles: carrito.map(item => ({
+            id_producto: item.id_producto,
+            cantidad: item.cantidad,
+            precio_unitario: item.precio_unitario,
+            subtotal: item.subtotal
+        }))
     };
 
     try {
@@ -243,9 +243,17 @@ btnProcesarVenta.addEventListener('click', async () => {
         lblNombreCliente.textContent = "Público General";
         lblNombreCliente.style.color = "var(--color-primario)";
         hiddenClienteId.value = '';
-        renderizarCarrito();
+        
+        // Recargamos inventario para actualizar stock visualmente
+        await cargarCatalogoParaVenta(); 
+        renderizarCarritoUI();
 
     } catch (error) {
         alert(`❌ Error al procesar la venta: ${error.message}`);
     }
 });
+
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
+document.addEventListener('DOMContentLoaded', cargarCatalogoParaVenta);

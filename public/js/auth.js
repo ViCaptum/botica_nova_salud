@@ -56,7 +56,7 @@ if (formLogin) {
 }
 
 // ==========================================
-// 3. INYECTAR SIDEBAR DINÁMICAMENTE
+// 3. INYECTAR SIDEBAR DINÁMICAMENTE[cite: 31]
 // ==========================================
 if (!window.location.pathname.includes('index.html') && window.location.pathname !== '/') {
     
@@ -65,7 +65,6 @@ if (!window.location.pathname.includes('index.html') && window.location.pathname
     const nombreRol = usuario.rol === 1 ? 'ADMIN' : 'VENDEDOR';
     
     const sidebarHTML = `
-        <!-- BOTÓN FLOTANTE PARA PANTALLAS < 611px -->
         <button id="mobile-menu-btn" class="mobile-menu-btn">☰</button>
 
         <aside class="sidebar" id="sidebar-menu">
@@ -84,14 +83,17 @@ if (!window.location.pathname.includes('index.html') && window.location.pathname
                         <li><a href="mantenimiento.html" class="nav-item">🛠️ <span>Mantenimiento</span></a></li>
                         <li><a href="historial-ventas.html" class="nav-item">📊 <span>Historial</span></a></li>
                     ` : ''}
+                    <!-- NUEVO: Enlace a Perfil para todos los usuarios -->
+                    <li><a href="perfil.html" class="nav-item">👤 <span>Mi Perfil</span></a></li>
                 </ul>
             </nav>
 
             <div class="sidebar-footer" style="border-top: 1px solid var(--borde); padding-top: 15px; margin-top: auto;">
-                <div class="user-details" style="margin-bottom: 10px; text-align: center; font-size: 0.85em;">
+                <!-- Ajuste: Hacer clic en el usuario lleva al perfil -->
+                <a href="perfil.html" class="user-details" style="margin-bottom: 10px; text-align: center; font-size: 0.85em; display: block; text-decoration: none; color: inherit;">
                     <p><strong>${usuario.nombre}</strong></p>
                     <p style="color: var(--color-primario); font-size: 0.8em; font-weight: bold;">${nombreRol}</p>
-                </div>
+                </a>
                 <button id="btn-logout" class="logout-item" title="Cerrar Sesión">
                     🚪 <span>Cerrar Sesión</span>
                 </button>
@@ -101,30 +103,30 @@ if (!window.location.pathname.includes('index.html') && window.location.pathname
 
     document.body.insertAdjacentHTML('afterbegin', sidebarHTML);
 
-    // --- LÓGICA DEL MENÚ RESPONSIVO ---
+    // --- Lógica del Menú Móvil ---
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const sidebar = document.getElementById('sidebar-menu');
 
     if (mobileMenuBtn && sidebar) {
-        // Al pasar el cursor sobre el botón de 3 líneas, el menú desliza hacia la pantalla
+        // Al hacer hover en el botón flotante, aparece el menú
         mobileMenuBtn.addEventListener('mouseenter', () => {
             sidebar.classList.add('activa');
         });
         
-        // Alternativa táctil para pantallas (clic)
+        // Alternativa táctil (clic)
         mobileMenuBtn.addEventListener('click', () => {
             sidebar.classList.toggle('activa');
         });
 
-        // Al sacar el cursor de la barra, esta se esconde de nuevo
+        // Al salir el mouse de toda la barra lateral, se esconde sola
         sidebar.addEventListener('mouseleave', () => {
-            if(window.innerWidth <= 611) {
+            if(window.innerWidth <= 800) {
                 sidebar.classList.remove('activa');
             }
         });
     }
 
-    // --- LÓGICA DE LOGOUT ---
+    // --- Lógica de Logout ---
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {

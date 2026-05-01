@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Perfil - Botica Nova Salud</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .perfil-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--bg-superficie);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--borde);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .user-avatar {
+            font-size: 4em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <div class="perfil-container" style="padding: 20px;"> <!-- Padding reducido -->
+            <div class="user-avatar" style="font-size: 3em;">🧑‍⚕️</div>
+            <h2 style="text-align: center; color: var(--color-primario); margin-bottom: 2px;" id="perfil-nombre">Cargando...</h2>
+            <p style="text-align: center; color: var(--texto-secundario); font-size: 0.9em; margin-bottom: 20px;">
+                Rol: <span id="perfil-rol">---</span>
+            </p>
+
+            <form id="form-perfil">
+                <h3 style="font-size: 1.1em; border-bottom: 1px solid var(--borde); padding-bottom: 5px; margin-bottom: 10px;">Información de Cuenta</h3>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-full-width">
+                        <label>Nombre de Usuario:</label>
+                        <input type="text" id="perfil-username-input" required>
+                    </div>
+                    <div>
+                        <label>Correo Electrónico:</label>
+                        <input type="email" id="perfil-correo" required>
+                    </div>
+                    <div>
+                        <label>Teléfono:</label>
+                        <input type="text" id="perfil-telefono">
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1.1em; border-bottom: 1px solid var(--borde); padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px;">Seguridad</h3>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Contraseña Actual:</label>
+                        <input type="password" id="perfil-pass-actual">
+                    </div>
+                    <div>
+                        <label>Nueva Contraseña:</label>
+                        <input type="password" id="perfil-pass-nueva">
+                    </div>
+                </div>
+
+                <div id="msg-perfil" style="margin-top: 15px; padding: 8px; border-radius: 6px; display: none; font-size: 0.9em;"></div>
+                <button type="submit" style="width: 100%; margin-top: 15px; padding: 12px;">💾 Guardar Cambios</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/perfil.js"></script>
+</body>
+</html>
