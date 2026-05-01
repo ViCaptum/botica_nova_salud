@@ -56,49 +56,75 @@ if (formLogin) {
 }
 
 // ==========================================
-// 3. INYECTAR LA CABECERA CON EL LAYOUT CORREGIDO[cite: 32, 33]
+// 3. INYECTAR SIDEBAR DINÁMICAMENTE
 // ==========================================
 if (!window.location.pathname.includes('index.html') && window.location.pathname !== '/') {
     
     const usuarioStr = localStorage.getItem('usuario_botica');
     const usuario = usuarioStr ? JSON.parse(usuarioStr) : { nombre: 'Desconocido', rol: 2 };
-    const nombreRol = usuario.rol === 1 ? 'ADMINISTRADOR' : 'VENDEDOR';
+    const nombreRol = usuario.rol === 1 ? 'ADMIN' : 'VENDEDOR';
     
-    const headerHTML = `
-        <header style="flex-direction: column; align-items: flex-start; gap: 20px;">
-            <!-- Fila Superior: Logo y Perfil -->
-            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <div class="logo-area">
-                    <h1 style="margin: 0; font-size: 2.5em;">
-                        <span style="color: var(--color-primario);">Nova Salud</span>
-                    </h1>
-                </div>
-                
-                <div class="user-info-area" style="background-color: var(--bg-input); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--borde); box-shadow: 0 4px 10px rgba(0,0,0,0.3); min-width: 200px; text-align: center;">
-                    <p style="margin: 0 0 5px 0;">👤 <strong>${usuario.nombre}</strong></p>
-                    <p style="font-size: 0.8em; color: var(--color-primario); font-weight: bold; margin-bottom: 10px;">${nombreRol}</p>
-                    <button id="btn-logout" style="background-color: var(--error); color: white; padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; width: 100%; font-weight: bold; transition: opacity 0.2s;">Cerrar Sesión</button>
-                </div>
+    const sidebarHTML = `
+        <!-- BOTÓN FLOTANTE PARA PANTALLAS < 611px -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn">☰</button>
+
+        <aside class="sidebar" id="sidebar-menu">
+            <div class="logo-area" style="margin-bottom: 30px; display: flex; align-items: center; padding: 0 18px;">
+                <span style="font-size: 1.5em; color: var(--color-primario); min-width: 30px; cursor: pointer;">☰</span>
+                <h1 class="user-details" style="font-size: 1.2em; margin-left: 20px; color: white;">Nova Salud</h1>
             </div>
 
-            <!-- Fila Inferior: Navegación corregida[cite: 32, 33] -->
-            <nav style="width: 100%; border-top: 1px solid var(--borde); padding-top: 15px;">
-                <ul style="list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0;">
-                    <li><a href="dashboard.html" class="nav-item">🏠 Inicio</a></li>
-                    <li><a href="ventas.html" class="nav-item">🛒 Caja (Ventas)</a></li>
-                    <li><a href="inventario.html" class="nav-item">📦 Inventario</a></li>
+            <nav class="sidebar-nav" style="flex-grow: 1;">
+                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px;">
+                    <li><a href="dashboard.html" class="nav-item">🏠 <span>Inicio</span></a></li>
+                    <li><a href="ventas.html" class="nav-item">🛒 <span>Caja (Ventas)</span></a></li>
+                    <li><a href="inventario.html" class="nav-item">📦 <span>Inventario</span></a></li>
                     ${usuario.rol === 1 ? `
-                        <li><a href="empleados.html" class="nav-item">👥 Empleados</a></li>
-                        <li><a href="mantenimiento.html" class="nav-item">🛠️ Mantenimiento</a></li>
-                        <li><a href="historial-ventas.html" class="nav-item">📊 Historial</a></li>
+                        <li><a href="empleados.html" class="nav-item">👥 <span>Empleados</span></a></li>
+                        <li><a href="mantenimiento.html" class="nav-item">🛠️ <span>Mantenimiento</span></a></li>
+                        <li><a href="historial-ventas.html" class="nav-item">📊 <span>Historial</span></a></li>
                     ` : ''}
                 </ul>
             </nav>
-        </header>
+
+            <div class="sidebar-footer" style="border-top: 1px solid var(--borde); padding-top: 15px; margin-top: auto;">
+                <div class="user-details" style="margin-bottom: 10px; text-align: center; font-size: 0.85em;">
+                    <p><strong>${usuario.nombre}</strong></p>
+                    <p style="color: var(--color-primario); font-size: 0.8em; font-weight: bold;">${nombreRol}</p>
+                </div>
+                <button id="btn-logout" class="logout-item" title="Cerrar Sesión">
+                    🚪 <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
     `;
 
-    document.body.insertAdjacentHTML('afterbegin', headerHTML);
+    document.body.insertAdjacentHTML('afterbegin', sidebarHTML);
 
+    // --- LÓGICA DEL MENÚ RESPONSIVO ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('sidebar-menu');
+
+    if (mobileMenuBtn && sidebar) {
+        // Al pasar el cursor sobre el botón de 3 líneas, el menú desliza hacia la pantalla
+        mobileMenuBtn.addEventListener('mouseenter', () => {
+            sidebar.classList.add('activa');
+        });
+        
+        // Alternativa táctil para pantallas (clic)
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('activa');
+        });
+
+        // Al sacar el cursor de la barra, esta se esconde de nuevo
+        sidebar.addEventListener('mouseleave', () => {
+            if(window.innerWidth <= 611) {
+                sidebar.classList.remove('activa');
+            }
+        });
+    }
+
+    // --- LÓGICA DE LOGOUT ---
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
