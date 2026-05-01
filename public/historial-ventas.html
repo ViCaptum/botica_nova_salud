@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Ventas - Botica Nova Salud</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .autocomplete-container { position: relative; width: 100%; }
+        .autocomplete-list {
+            position: absolute; top: 100%; left: 0; right: 0; z-index: 99;
+            background-color: var(--bg-input); border: 1px solid var(--borde);
+            border-radius: 4px; max-height: 150px; overflow-y: auto; display: none;
+        }
+        .autocomplete-list div { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--borde); }
+        .autocomplete-list div:hover { background-color: var(--color-primario); color: #000; }
+    </style>
+</head>
+<body>
+    
+    <main>
+        <section>
+            <h2>Auditoría de Ventas</h2>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px;">
+                <div class="autocomplete-container" style="flex-grow: 1;">
+                    <label for="input-buscar-vendedor">Filtrar por Vendedor (Nombre o Username):</label>
+                    <input type="text" id="input-buscar-vendedor" placeholder="Escribe para buscar empleado..." autocomplete="off">
+                    <div id="lista-empleados" class="autocomplete-list"></div>
+                    <input type="hidden" id="vendedor-id-seleccionado"> <!-- Aquí guardaremos el ID real para el backend -->
+                </div>
+                
+                <button id="btn-filtrar-ventas">Aplicar Filtro</button>
+            </div>
+
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID Venta</th>
+                        <th>Fecha</th>
+                        <th>Vendedor</th>
+                        <th>DNI Cliente</th>
+                        <th>Total (S/)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-historial-body">
+                    <!-- Filas del historial -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/inventario.js"></script>
+</body>
+</html>

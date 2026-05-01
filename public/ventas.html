@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Punto de Venta - Botica Nova Salud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <main>
+        <!-- ========================================== -->
+        <!-- 1. SECCIÓN DEL CLIENTE -->
+        <!-- ========================================== -->
+        <section id="seccion-cliente">
+            <h2>1. Datos del Cliente (Opcional)</h2>
+            <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px;">
+                <div>
+                    <label for="input-dni">DNI del cliente:</label>
+                    <input type="text" id="input-dni" placeholder="Ej. 77554433" maxlength="8">
+                </div>
+                <button id="btn-buscar-cliente">Buscar DNI</button>
+            </div>
+            
+            <p>Cliente seleccionado: <strong id="lbl-nombre-cliente" style="color: var(--color-primario);">Público General</strong></p>
+            <input type="hidden" id="cliente-id-seleccionado" value="">
+
+            <!-- MINI-FORMULARIO DE REGISTRO RÁPIDO -->
+            <div id="seccion-nuevo-cliente" style="display: none; background-color: var(--bg-fondo); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px dashed var(--color-primario);">
+                <h3 style="color: var(--color-secundario); font-size: 1.1em;">El cliente no existe. ¿Deseas registrarlo rápido?</h3>
+                <div class="form-grid" style="margin-top: 10px;">
+                    <div>
+                        <input type="text" id="nuevo-cli-nombres" placeholder="Nombres">
+                    </div>
+                    <div>
+                        <input type="text" id="nuevo-cli-apellidos" placeholder="Apellidos">
+                    </div>
+                    <div class="form-full-width" style="display: flex; gap: 10px;">
+                        <button id="btn-guardar-cliente-rapido" style="flex-grow: 1;">Guardar Cliente y Seleccionar</button>
+                        <!-- NUEVO BOTÓN DE CANCELAR -->
+                        <button id="btn-cancelar-cliente" style="background-color: var(--borde); color: var(--texto-principal);">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- ========================================== -->
+        <!-- 2. SECCIÓN PARA BUSCAR Y AGREGAR PRODUCTOS (¡Estaba perdido!) -->
+        <!-- ========================================== -->
+        <section id="seccion-agregar-carrito">
+            <h2>2. Agregar Productos</h2>
+            <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex-grow: 1; min-width: 250px;">
+                    <label for="input-buscar-prod-venta">Nombre o código de barras:</label>
+                    <input type="text" id="input-buscar-prod-venta" placeholder="Ej. Paracetamol">
+                </div>
+                <button id="btn-buscar-prod-venta">Buscar</button>
+            </div>
+            
+            <!-- Lista desplegable de resultados -->
+            <select id="select-resultados-prod" style="display: none; margin-top: 10px; width: 100%; padding: 10px;"></select>
+            
+            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 15px;">
+                <div>
+                    <label for="input-cantidad-venta">Cantidad:</label>
+                    <input type="number" id="input-cantidad-venta" value="1" min="1" style="width: 80px;">
+                </div>
+                <button id="btn-agregar-carrito">Añadir al Carrito</button>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- ========================================== -->
+        <!-- 3. EL CARRITO DE COMPRAS -->
+        <!-- ========================================== -->
+        <section id="seccion-carrito">
+            <h2>3. Detalle de Venta</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio Un.</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Quitar</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-carrito-body">
+                    <!-- JS inyecta el carrito aquí -->
+                </tbody>
+            </table>
+            
+            <h3 style="margin-top: 20px; font-size: 1.5em; text-align: right;">Total a Pagar: S/ <span id="lbl-total-venta" style="color: var(--color-primario);">0.00</span></h3>
+            <div style="text-align: right; margin-top: 15px;">
+                <button id="btn-procesar-venta" disabled style="font-size: 1.2em; padding: 15px 30px;">Confirmar Venta</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ventas.js"></script>
+</body>
+</html>

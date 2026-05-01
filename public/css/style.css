@@ -1,0 +1,316 @@
+/* ==========================================
+   1. VARIABLES DE TEMA (DARK MODE)
+   ========================================== */
+:root {
+    /* Paleta de Colores Oscuros */
+    --bg-fondo: #121212;          /* Fondo principal oscuro */
+    --bg-superficie: #1E1E1E;     /* Fondo de las tarjetas/paneles */
+    --bg-input: #2C2C2C;          /* Fondo de las cajas de texto */
+    
+    /* Colores de Acento (Tema Salud/Botica) */
+    --color-primario: #00BFA5;    /* Verde/Turquesa médico brillante */
+    --color-primario-hover: #008E7B;
+    --color-secundario: #BB86FC;  /* Morado suave para acentos secundarios */
+    
+    /* Textos */
+    --texto-principal: #E0E0E0;   /* Blanco roto para no cansar la vista */
+    --texto-secundario: #A0A0A0;  /* Gris claro para labels y placeholders */
+    --texto-titulo: #FFFFFF;      /* Blanco puro para títulos */
+    
+    /* Estados */
+    --borde: #333333;
+    --error: #CF6679;             /* Rojo suave para errores */
+    --exito: #03DAC6;             /* Verde cyan para éxitos */
+}
+
+/* ==========================================
+   2. RESET Y TIPOGRAFÍA BÁSICA
+   ========================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-fondo);
+    color: var(--texto-principal);
+    line-height: 1.6;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el contenido principal */
+}
+
+h1, h2, h3 {
+    color: var(--texto-titulo);
+    margin-bottom: 15px;
+}
+
+a {
+    color: var(--color-primario);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--color-secundario);
+    text-decoration: underline;
+}
+
+/* ==========================================
+   3. ESTRUCTURA Y LAYOUT (CONTENEDORES)
+   ========================================== */
+main {
+    width: 100%;
+    max-width: 1000px; /* Ancho máximo para que no se deforme en pantallas gigantes */
+    margin: 0 auto;
+}
+
+header {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-superficie);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+section {
+    background-color: var(--bg-superficie);
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--borde);
+    margin: 20px 0;
+}
+
+/* ==========================================
+   4. FORMULARIOS, INPUTS Y BOTONES
+   ========================================== */
+form div {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--texto-secundario);
+    font-size: 0.9em;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--borde);
+    border-radius: 4px;
+    color: var(--texto-principal);
+    font-size: 1em;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 5px rgba(0, 191, 165, 0.5); /* Resplandor al enfocar */
+}
+
+button {
+    background-color: var(--color-primario);
+    color: #000000; /* Texto oscuro sobre el botón brillante para contraste */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+button:hover {
+    background-color: var(--color-primario-hover);
+}
+
+button:active {
+    transform: scale(0.98); /* Efecto de "clic" presionado */
+}
+
+button:disabled {
+    background-color: var(--borde);
+    color: var(--texto-secundario);
+    cursor: not-allowed;
+}
+
+/* Pequeño ajuste para botones al lado de inputs (Buscadores) */
+section#seccion-filtros, section#seccion-cliente, section#seccion-agregar-carrito {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+section#seccion-filtros input, section#seccion-filtros select {
+    width: auto;
+    flex-grow: 1;
+}
+
+/* ==========================================
+   5. TABLAS (INVENTARIO Y CARRITO)
+   ========================================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: var(--bg-superficie);
+}
+
+thead {
+    background-color: var(--bg-input);
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--borde);
+}
+
+th {
+    color: var(--color-primario);
+    font-weight: 600;
+}
+
+tbody tr {
+    transition: background-color 0.2s;
+}
+
+tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05); /* Brillo sutil al pasar el mouse */
+}
+
+/* ==========================================
+   6. CLASES DE UTILIDAD Y COMPONENTES
+   ========================================== */
+.oculto {
+    display: none !important;
+}
+
+.link-toggle {
+    color: var(--color-secundario);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.link-toggle:hover {
+    color: #FFFFFF;
+}
+
+/* Centrado específico para el panel de login */
+#seccion-login {
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.social-btn{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 60px;
+    width: 60px;
+    padding: 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    color: #9d8dbb;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+
+.social-btn:hover{
+    width: 180px;
+    color: #FFFFFF;
+    transform: translateY(-5px);
+}
+
+/* ==========================================
+   7. COMPONENTES EXTRA (CARDS Y NAVEGACIÓN)
+   ========================================== */
+/* La tarjeta centrada para el Login */
+.card {
+    background-color: var(--bg-superficie);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid var(--borde);
+}
+
+/* El nav-item que agregaste, adaptado al Dark Mode */
+.nav-item {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--texto-principal);
+    background-color: var(--bg-input);
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--borde);
+}
+
+.nav-item:hover {
+    background-color: var(--color-primario);
+    color: #000000;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 191, 165, 0.3);
+}
+
+/* Limpiar los estilos de lista para el dashboard */
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* ==========================================
+   8. SISTEMA DE GRILLAS PARA FORMULARIOS (Más compactos)
+   ========================================== */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas del mismo tamaño */
+    gap: 15px;
+}
+
+.form-grid > div {
+    margin-bottom: 0; /* Sobrescribe el margen inferior por defecto */
+}
+
+/* Para elementos que sí deben ocupar toda la fila (ej. botones o inputs largos) */
+.form-full-width {
+    grid-column: 1 / -1; 
+}

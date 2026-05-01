@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Botica Nova Salud</title>
+    <!-- Ruta corregida -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="justify-content: center; min-height: 100vh;"> <!-- Esto centra la tarjeta verticalmente -->
+    
+    <main class="card">
+        <h1 style="color: var(--color-primario);">Nova Salud</h1>
+        <h2>Iniciar Sesión</h2>
+        
+        <form id="form-login" style="text-align: left; margin-top: 20px;">
+            <div>
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" required>
+            </div>
+            <div>
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" required>
+            </div>
+            
+            <p id="msg-error-login" style="color: var(--error); display: none; margin-bottom: 10px;"></p>
+            
+            <button type="submit" style="width: 100%; margin-top: 10px;">Entrar al Sistema</button>
+        </form>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+</body>
+</body>
+</html>

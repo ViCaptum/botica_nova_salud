@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mantenimiento - Botica Nova Salud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main>
+        <section>
+            <h2>Gestión de Catálogos</h2>
+            <p style="color: var(--texto-secundario);">Agrega nuevas categorías o laboratorios para usarlos en el inventario.</p>
+            
+            <div class="form-grid" style="margin-top: 20px;">
+                <!-- Formulario Categorías -->
+                <div style="background: var(--bg-input); padding: 15px; border-radius: 8px;">
+                    <h3>Nueva Categoría</h3>
+                    <form id="form-nueva-categoria">
+                        <label>Nombre:</label>
+                        <input type="text" id="cat-nombre" placeholder="Ej. Analgésicos" required>
+                        <button type="submit" style="width: 100%; margin-top: 10px;">Agregar Categoría</button>
+                    </form>
+                </div>
+
+                <!-- Formulario Laboratorios -->
+                <div style="background: var(--bg-input); padding: 15px; border-radius: 8px;">
+                    <h3>Nuevo Laboratorio</h3>
+                    <form id="form-nuevo-laboratorio">
+                        <label>Nombre:</label>
+                        <input type="text" id="lab-nombre" placeholder="Ej. Pfizer" required>
+                        <button type="submit" style="width: 100%; margin-top: 10px;">Agregar Laboratorio</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Listados actuales para verificar -->
+        <section class="form-grid">
+            <div>
+                <h3>Categorías Registradas</h3>
+                <table border="1">
+                    <thead><tr><th>Nombre</th></tr></thead>
+                    <tbody id="tabla-categorias-mante"></tbody>
+                </table>
+            </div>
+            <div>
+                <h3>Laboratorios Registrados</h3>
+                <table border="1">
+                    <thead><tr><th>Nombre</th></tr></thead>
+                    <tbody id="tabla-laboratorios-mante"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/mantenimiento.js"></script>
+</body>
+</html>

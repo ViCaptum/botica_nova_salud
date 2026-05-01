@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio - Botica Nova Salud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main>
+        <section>
+            <h2>Catálogo y Disponibilidad</h2>
+            <p style="color: var(--texto-secundario); margin-bottom: 15px;">Consulta rápida de precios y stock disponible.</p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="input-buscar-catalogo" placeholder="Buscar medicamento por nombre..." style="flex-grow: 1;">
+                <button id="btn-buscar-catalogo">Buscar</button>
+            </div>
+
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Nombre del Producto</th>
+                        <th>Tipo</th>
+                        <th>Precio (S/)</th>
+                        <th>Stock Disponible</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-catalogo-body">
+                    <!-- Filas del catálogo -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

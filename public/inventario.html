@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario - Botica Nova Salud</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <main>
+        <!-- Sección de Filtros -->
+        <section id="seccion-filtros">
+            <input type="text" id="input-buscar" placeholder="Buscar por nombre o código...">
+            <select id="select-tipo">
+                <option value="todos">Todos los productos</option>
+                <option value="generico">Solo Genéricos</option>
+                <option value="marca">Solo De Marca</option>
+            </select>
+            <button id="btn-buscar">Buscar</button>
+            <button id="btn-nuevo-producto" style="display: none;">+ Nuevo Producto</button>
+        </section>
+
+        <!-- Tabla de Resultados -->
+        <section>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Laboratorio</th>
+                        <th>Tipo</th>
+                        <th>Precio (S/)</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-productos-body">
+                    <!-- JavaScript inyectará las filas (<tr>) aquí -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Formulario Oculto para Crear/Editar (Modal crudo) -->
+        <section id="seccion-formulario-producto" style="display: none;">
+            <h2 id="titulo-formulario">Nuevo Producto</h2>
+            <form id="form-producto">
+                <input type="hidden" id="prod-id"> <!-- ID oculto para saber si actualizamos o creamos -->
+                
+                <!-- En un proyecto real, las categorías y laboratorios se traerían con otro fetch a sus propias tablas -->
+                <label>Categoría: 
+                    <select id="prod-categoria" required>
+                        <option value="">Cargando categorías...</option>
+                    </select>
+                </label><br>
+
+                <label>Laboratorio: 
+                    <select id="prod-laboratorio" required>
+                        <option value="">Cargando laboratorios...</option>
+                    </select>
+                </label><br>
+                <label>Código de Barras: <input type="text" id="prod-codigo"></label><br>
+                <label>Nombre: <input type="text" id="prod-nombre" required></label><br>
+                <label>Es Genérico: 
+                    <select id="prod-generico">
+                        <option value="1">Sí (Genérico)</option>
+                        <option value="0">No (De Marca)</option>
+                    </select>
+                </label><br>
+                <label>Precio: <input type="number" step="0.01" id="prod-precio" required></label><br>
+                <label>Stock Actual: <input type="number" id="prod-stock" required></label><br>
+                <label>Stock Mínimo: <input type="number" id="prod-minimo" required></label><br>
+                
+                <button type="submit">Guardar Producto</button>
+                <button type="button" id="btn-cancelar-producto">Cancelar</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/inventario.js"></script> <!-- o ventas.js -->
+</body>
+</html>
