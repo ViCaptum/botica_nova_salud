@@ -14,7 +14,7 @@ async function cargarCategorias() {
                 <td style="text-align: center;">
                     <button onclick="eliminarItem('categorias', ${c.id_categoria})" 
                             style="background: transparent; color: var(--error); border: 1px solid var(--error); padding: 5px 8px; font-size: 0.8em;">
-                        🗑️
+                        <img src="img/papelera-de-reciclaje.png" alt="editar" class="btn-icon">
                     </button>
                 </td>
             </tr>
@@ -32,7 +32,7 @@ async function cargarLaboratorios() {
                 <td style="text-align: center;">
                     <button onclick="eliminarItem('laboratorios', ${l.id_laboratorio})" 
                             style="background: transparent; color: var(--error); border: 1px solid var(--error); padding: 5px 8px; font-size: 0.8em;">
-                        🗑️
+                        <img src="img/papelera-de-reciclaje.png" alt="editar" class="btn-icon">
                     </button>
                 </td>
             </tr>

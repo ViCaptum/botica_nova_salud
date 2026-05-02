@@ -29,7 +29,7 @@ btnBuscarCliente.addEventListener('click', async () => {
     if (dni.length === 0) return;
 
     try {
-        // Llama a tu API de buscar cliente (GET /api/clientes/buscar/:dni)[cite: 33]
+        // Llama a tu API de buscar cliente (GET /api/clientes/buscar/:dni)
         const cliente = await API.get(`/clientes/buscar/${dni}`);
         
         lblNombreCliente.textContent = `${cliente.nombres} ${cliente.apellidos}`;
@@ -38,7 +38,7 @@ btnBuscarCliente.addEventListener('click', async () => {
         seccionNuevoCliente.style.display = 'none'; 
         
     } catch (error) {
-        // Si hay error 404, mostramos el mini-formulario[cite: 33]
+        // Si hay error 404, mostramos el mini-formulario
         lblNombreCliente.textContent = "DNI no registrado";
         lblNombreCliente.style.color = "var(--texto-secundario)";
         hiddenClienteId.value = "";
@@ -109,7 +109,7 @@ function renderizarGridProductos(productos) {
                 Stock: ${prod.stock_actual}
             </div>
             <button onclick="agregarAlCarrito(${prod.id_producto})" ${sinStock ? 'disabled' : ''} style="width: 100%; padding: 8px;">
-                ${sinStock ? 'Agotado' : '🛒 Agregar'}
+                ${sinStock ? 'Agotado' : '<img src="img/anadir-a-la-cesta.png" alt="buscar" class="btn-icon"> Agregar'}
             </button>
         `;
         gridProductos.appendChild(div);
@@ -180,7 +180,7 @@ function renderizarCarritoUI() {
                     <span style="margin: 0 10px; font-weight: bold;">${item.cantidad}</span>
                     <button onclick="cambiarCantidad(${index}, 1)" style="padding: 2px 8px; cursor: pointer;">+</button>
                 </div>
-                <button class="btn-quitar" onclick="quitarDelCarrito(${index})">🗑️</button>
+                <button class="btn-quitar" onclick="quitarDelCarrito(${index})"><img src="img/papelera-de-reciclaje.png" alt="buscar" class="btn-icon"></button>
             </div>
         `;
         contenedorCarrito.appendChild(div);

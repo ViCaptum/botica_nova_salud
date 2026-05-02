@@ -55,7 +55,7 @@ function renderizarHistorial(ventas) {
             <td style="font-weight: bold; color: var(--color-primario);">S/ ${parseFloat(venta.total).toFixed(2)}</td>
             <td>
                 <button onclick="verDetallesVenta(${venta.id_venta})" style="padding: 6px 12px; font-size: 0.85em; background-color: transparent; border: 1px solid var(--color-secundario); color: var(--color-secundario);">
-                    👁️ Detalles
+                    <img src="img/expediente.png" alt="buscar" class="btn-icon">Detalles
                 </button>
             </td>
         `;

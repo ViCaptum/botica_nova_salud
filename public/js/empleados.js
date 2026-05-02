@@ -51,8 +51,12 @@ function renderizarTablaEmpleados(lista) {
                 // Ahora tenemos Editar y Eliminar
                 botonesAdmin = `
                     <div style="display: flex; gap: 5px; justify-content: center;">
-                        <button onclick="abrirDetalles(${emp.id})" style="background-color: var(--color-primario); color: black; padding: 5px 10px; border-radius: 4px; font-size: 0.9em;" title="Ver Detalles / Editar">✏️</button>
-                        <button onclick="eliminarEmpleado(${emp.id})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 5px 10px; border-radius: 4px; font-size: 0.9em;" title="Despedir / Eliminar">🗑️</button>
+                        <button onclick="abrirDetalles(${emp.id})" style="background-color: var(--color-primario); color: black; padding: 5px 10px; border-radius: 4px; font-size: 0.9em;" title="Ver Detalles / Editar">
+                        <img src="img/editar.png" alt="editar" class="btn-icon">
+                        </button>
+                        <button onclick="eliminarEmpleado(${emp.id})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 5px 10px; border-radius: 4px; font-size: 0.9em;" title="Despedir / Eliminar">
+                        <img src="img/papelera-de-reciclaje.png" alt="editar" class="btn-icon">
+                        </button>
                     </div>
                 `;
             }
@@ -116,7 +120,7 @@ if (formEditar) {
 
         try {
             await API.put(`/usuarios/${id}`, payload);
-            alert("✅ Datos del empleado actualizados.");
+            alert("Datos del empleado actualizados.");
             modalEditar.style.display = 'none';
             cargarDirectorio(); // Recargamos la tabla
         } catch (error) {
@@ -174,7 +178,7 @@ if (formRegistro) {
             await API.post('/usuarios/registro', payload);
             
             msgExito.innerHTML = `
-                <div style="text-align: center; margin-bottom: 10px;"><strong>✅ ¡Empleado Registrado!</strong></div>
+                <div style="text-align: center; margin-bottom: 10px;"><strong>¡Empleado Registrado!</strong></div>
                 Entréguele estas credenciales de acceso:<br><br>
                 <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; font-family: monospace;">
                     <strong>Usuario:</strong> ${generatedUsername}<br>

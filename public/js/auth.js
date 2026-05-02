@@ -14,7 +14,7 @@ function protegerRutas() {
 }
 protegerRutas();
 
-// 2. LÓGICA DEL LOGIN (Sin cambios para no romper el acceso)[cite: 32]
+// 2. LÓGICA DEL LOGIN
 const formLogin = document.getElementById('form-login');
 if (formLogin) {
     formLogin.addEventListener('submit', async (e) => {
@@ -56,7 +56,7 @@ if (formLogin) {
 }
 
 // ==========================================
-// 3. INYECTAR SIDEBAR DINÁMICAMENTE[cite: 31]
+// 3. INYECTAR SIDEBAR DINÁMICAMENTE
 // ==========================================
 if (!window.location.pathname.includes('index.html') && window.location.pathname !== '/') {
     
@@ -69,22 +69,21 @@ if (!window.location.pathname.includes('index.html') && window.location.pathname
 
         <aside class="sidebar" id="sidebar-menu">
             <div class="logo-area" style="margin-bottom: 30px; display: flex; align-items: center; padding: 0 18px;">
-                <span style="font-size: 1.5em; color: var(--color-primario); min-width: 30px; cursor: pointer;">☰</span>
+                <span style="font-size: 1.5em; color: var(--color-primario); min-width: 30px; cursor: pointer;"><img src="img/menu.png" alt="empleadps" class="icons-md"></span>
                 <h1 class="user-details" style="font-size: 1.2em; margin-left: 20px; color: white;">Nova Salud</h1>
             </div>
 
             <nav class="sidebar-nav" style="flex-grow: 1;">
                 <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px;">
-                    <li><a href="dashboard.html" class="nav-item">🏠 <span>Inicio</span></a></li>
-                    <li><a href="ventas.html" class="nav-item">🛒 <span>Caja (Ventas)</span></a></li>
-                    <li><a href="inventario.html" class="nav-item">📦 <span>Inventario</span></a></li>
+                    <li><a href="dashboard.html" class="nav-item"><img src="img/pagina-de-inicio.png" alt="inicio" class="icons-md"> <span>Inicio</span></a></li>
+                    <li><a href="ventas.html" class="nav-item"><img src="img/cajero-automatico.png" alt="ventas" class="icons-md"> <span>Caja (Ventas)</span></a></li>
+                    <li><a href="inventario.html" class="nav-item"><img src="img/inventario.png" alt="inventario" class="icons-md"> <span>Inventario</span></a></li>
                     ${usuario.rol === 1 ? `
-                        <li><a href="empleados.html" class="nav-item">👥 <span>Empleados</span></a></li>
-                        <li><a href="mantenimiento.html" class="nav-item">🛠️ <span>Mantenimiento</span></a></li>
-                        <li><a href="historial-ventas.html" class="nav-item">📊 <span>Historial</span></a></li>
+                        <li><a href="empleados.html" class="nav-item"><img src="img/jefe-de-equipo.png" alt="empleadps" class="icons-md"> <span>Empleados</span></a></li>
+                        <li><a href="mantenimiento.html" class="nav-item"><img src="img/catalogar.png" alt="catalgo" class="icons-md"> <span>catalogo</span></a></li>
+                        <li><a href="historial-ventas.html" class="nav-item"><img src="img/historial-de-transacciones.png" alt="Historial" class="icons-md"> <span>Historial</span></a></li>
                     ` : ''}
-                    <!-- NUEVO: Enlace a Perfil para todos los usuarios -->
-                    <li><a href="perfil.html" class="nav-item">👤 <span>Mi Perfil</span></a></li>
+                    <li><a href="perfil.html" class="nav-item"><img src="img/perfil-del-usuario.png" alt="perfil" class="icons-md"> <span>Mi Perfil</span></a></li>
                 </ul>
             </nav>
 
@@ -95,7 +94,7 @@ if (!window.location.pathname.includes('index.html') && window.location.pathname
                     <p style="color: var(--color-primario); font-size: 0.8em; font-weight: bold;">${nombreRol}</p>
                 </a>
                 <button id="btn-logout" class="logout-item" title="Cerrar Sesión">
-                    🚪 <span>Cerrar Sesión</span>
+                    <img src="img/cerrar-sesion.png" alt="cerrar" class="btn-icon"> <span>Cerrar Sesión</span>
                 </button>
             </div>
         </aside>

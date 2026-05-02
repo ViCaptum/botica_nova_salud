@@ -4,39 +4,17 @@
     <meta charset="UTF-8">
     <title>Gestión de Empleados - Botica Nova Salud</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .seccion-formulario {
-            background-color: var(--bg-fondo);
-            border: 1px solid var(--borde);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .seccion-formulario h3 {
-            color: var(--color-primario);
-            font-size: 1.1em;
-            margin-top: 0;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed var(--borde);
-        }
-        .admin-layout {
-            display: grid;
-            grid-template-columns: 400px 1fr; 
-            gap: 25px;
-            align-items: start;
-        }
-        @media (max-width: 1024px) {
-            .admin-layout { grid-template-columns: 1fr; } 
-        }
-    </style>
+    <!-- Enlace a Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <!-- MODAL DE DETALLES Y EDICIÓN (ADMIN) CORREGIDO -->
     <div id="modal-editar-emp" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px;">
-            <h2 style="color: var(--color-primario); margin-bottom: 20px;">📋 Detalles del Empleado</h2>
+            <h2 style="color: var(--color-primario); margin-bottom: 20px;"><img src="img/empleado.png" alt="det-empleado" class="icons-md"> Detalles del Empleado</h2>
             
             <!-- ID CORREGIDO PARA EVITAR DUPLICIDAD -->
             <form id="form-editar-emp" class="form-grid">
@@ -69,7 +47,7 @@
                 </div>
                 
                 <div class="form-full-width" style="display: flex; gap: 15px; margin-top: 15px;">
-                    <button type="submit" style="flex-grow: 1;">💾 Guardar Cambios</button>
+                    <button type="submit" style="flex-grow: 1;"><img src="img/salvado.png" alt="guardar" class="btn-icon"> Guardar Cambios</button>
                     <button type="button" onclick="document.getElementById('modal-editar-emp').style.display='none'" style="background-color: transparent; border: 1px solid var(--borde); color: var(--texto-principal);">Cancelar</button>
                 </div>
             </form>
@@ -85,7 +63,7 @@
         <div class="admin-layout">
             <!-- COLUMNA IZQ: FORMULARIO COMPACTO -->
             <section style="padding: 15px; margin: 0; max-height: 90vh; overflow-y: auto;">
-                <h3 style="margin-bottom: 15px; font-size: 1.1em;">➕ Alta de Personal</h3>
+                <h3 style="margin-bottom: 15px; font-size: 1.1em;"><img src="img/nueva-cuenta.png" alt="agregar" class="icons-md"> Alta de Personal</h3>
                 <form id="form-registro">
                     
                     <!-- Información Personal Agrupada -->
@@ -126,7 +104,7 @@
             <!-- COLUMNA DER: DIRECTORIO (TABLA) -->
             <section style="padding: 25px; margin: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                    <h3 style="margin: 0; color: var(--color-primario);">👥 Directorio</h3>
+                    <h3 style="margin: 0; color: var(--color-primario);"><img src="img/directorio-telefonico.png" alt="directorio" class="icons-md"> Directorio</h3>
                     <input type="text" id="input-buscar-emp" placeholder="Buscar empleado..." style="max-width: 300px;">
                 </div>
                 

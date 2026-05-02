@@ -52,8 +52,12 @@ function renderizarTablaInventario(productos) {
             const prodData = encodeURIComponent(JSON.stringify(prod));
             botonesAccion = `
                 <div style="display: flex; gap: 5px;">
-                    <button onclick="editarProducto('${prodData}')" style="background-color: var(--color-primario); color: black; padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">✏️ Editar</button>
-                    <button onclick="eliminarProducto(${prod.id_producto})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">🗑️</button>
+                    <button onclick="editarProducto('${prodData}')" style="background-color: var(--color-primario); color: black; padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">
+                    <img src="img/editar.png" alt="editar" class="btn-icon"> Editar
+                    </button>
+                    <button onclick="eliminarProducto(${prod.id_producto})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">
+                    <img src="img/papelera-de-reciclaje.png" alt="buscar" class="btn-icon">
+                    </button>
                 </div>
             `;
         } else {
@@ -77,7 +81,6 @@ function renderizarTablaInventario(productos) {
 // ==========================================
 // 2. BÚSQUEDA REACTIVA (Sin presionar botones)
 // ==========================================
-// Busca al cambiar la opción del combobox
 selectTipo.addEventListener('change', cargarInventarioCompleto);
 
 // Busca al escribir en el input (Debounce simple recomendado para producción)

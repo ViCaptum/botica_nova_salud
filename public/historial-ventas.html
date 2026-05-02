@@ -4,29 +4,10 @@
     <meta charset="UTF-8">
     <title>Historial de Ventas - Botica Nova Salud</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* Estilos del Autocompletado modernizados para combinar con el nuevo CSS */
-        .autocomplete-container { position: relative; width: 100%; }
-        .autocomplete-list {
-            position: absolute; top: 100%; left: 0; right: 0; z-index: 99;
-            background-color: var(--bg-superficie); border: 1px solid var(--color-primario);
-            border-radius: 8px; max-height: 200px; overflow-y: auto; display: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); margin-top: 5px;
-        }
-        .autocomplete-list div { 
-            padding: 12px 15px; 
-            cursor: pointer; 
-            border-bottom: 1px solid var(--borde); 
-            color: var(--texto-principal);
-            transition: background-color 0.2s;
-        }
-        .autocomplete-list div:last-child { border-bottom: none; }
-        .autocomplete-list div:hover { 
-            background-color: var(--color-primario); 
-            color: #ffffff; 
-            font-weight: 600;
-        }
-    </style>
+    <!-- Enlace a Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     
@@ -45,7 +26,7 @@
                 
                 <!-- Le agregamos white-space: nowrap para que no salte de línea y un icono -->
                 <button id="btn-filtrar-ventas" style="white-space: nowrap; padding: 12px 20px;">
-                    🔍 Aplicar Filtro
+                    <img src="img/buscar.png" alt="buscar" class="btn-icon"> Aplicar Filtro
                 </button>
             </div>
 

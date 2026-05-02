@@ -5,7 +5,7 @@ async function cargarDatosPerfil() {
     try {
         const datos = await API.get('/usuarios/perfil/me');
         document.getElementById('perfil-nombre').textContent = `${datos.nombre} ${datos.apellidos}`;
-        document.getElementById('perfil-rol').textContent = datos.rol === 1 ? 'Administrador' : 'Vendedor';
+        document.getElementById('perfil-rol').textContent = (datos.rol === 1 || datos.id_rol === 1) ? 'Administrador' : 'Vendedor';
         
         // Cargar el username en el input para que pueda editarlo
         document.getElementById('perfil-username-input').value = datos.username;

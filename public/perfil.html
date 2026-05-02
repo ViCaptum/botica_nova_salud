@@ -4,63 +4,60 @@
     <meta charset="UTF-8">
     <title>Mi Perfil - Botica Nova Salud</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .perfil-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: var(--bg-superficie);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid var(--borde);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .user-avatar {
-            font-size: 4em;
-            text-align: center;
-        }
-    </style>
+    <!-- Enlace a Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <main>
-        <div class="perfil-container" style="padding: 20px;"> <!-- Padding reducido -->
-            <div class="user-avatar" style="font-size: 3em;">🧑‍⚕️</div>
-            <h2 style="text-align: center; color: var(--color-primario); margin-bottom: 2px;" id="perfil-nombre">Cargando...</h2>
-            <p style="text-align: center; color: var(--texto-secundario); font-size: 0.9em; margin-bottom: 20px;">
-                Rol: <span id="perfil-rol">---</span>
+        <!-- Cambiamos el padding a 30px para que respire más y quitamos estilos forzados -->
+        <div class="perfil-container"> 
+            <div class="user-avatar"><img src="img/perfil-del-usuario.png" alt="perfil" class="icons-lg"></div>
+            <h2 id="perfil-nombre" style="text-align: center; color: var(--color-primario); margin-bottom: 5px;">cargando..</h2>
+            <p style="text-align: center; color: var(--texto-secundario); font-size: 0.95em; margin-bottom: 30px;">
+                Rol: <span id="perfil-rol">cargando</span>
             </p>
 
             <form id="form-perfil">
-                <h3 style="font-size: 1.1em; border-bottom: 1px solid var(--borde); padding-bottom: 5px; margin-bottom: 10px;">Información de Cuenta</h3>
-                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="form-full-width">
+                <h3 style="font-size: 1.1em; border-bottom: 1px solid var(--borde); padding-bottom: 8px; margin-bottom: 20px;">Información de Cuenta</h3>
+                
+                <!-- Cambiamos a una sola columna o gap mayor para que no se amontone -->
+                <div class="form-grid" style="grid-template-columns: 1fr; gap: 15px;">
+                    <div>
                         <label>Nombre de Usuario:</label>
                         <input type="text" id="perfil-username-input" required>
                     </div>
-                    <div>
-                        <label>Correo Electrónico:</label>
-                        <input type="email" id="perfil-correo" required>
-                    </div>
-                    <div>
-                        <label>Teléfono:</label>
-                        <input type="text" id="perfil-telefono">
+                    <!-- Agrupamos Correo y Teléfono en 2 columnas solo si hay espacio -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label>Correo Electrónico:</label>
+                            <input type="email" id="perfil-correo" required>
+                        </div>
+                        <div>
+                            <label>Teléfono:</label>
+                            <input type="text" id="perfil-telefono">
+                        </div>
                     </div>
                 </div>
 
-                <h3 style="font-size: 1.1em; border-bottom: 1px solid var(--borde); padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px;">Seguridad</h3>
-                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <h3 style="font-size: 1.1em; border-bottom: 1px solid var(--borde); padding-bottom: 8px; margin-top: 30px; margin-bottom: 20px;">Seguridad</h3>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div>
                         <label>Contraseña Actual:</label>
-                        <input type="password" id="perfil-pass-actual">
+                        <input type="password" id="perfil-pass-actual" placeholder="••••••••">
                     </div>
                     <div>
                         <label>Nueva Contraseña:</label>
-                        <input type="password" id="perfil-pass-nueva">
+                        <input type="password" id="perfil-pass-nueva" placeholder="Opcional">
                     </div>
                 </div>
 
-                <div id="msg-perfil" style="margin-top: 15px; padding: 8px; border-radius: 6px; display: none; font-size: 0.9em;"></div>
-                <button type="submit" style="width: 100%; margin-top: 15px; padding: 12px;">💾 Guardar Cambios</button>
+                <div id="msg-perfil" style="margin-top: 20px; padding: 10px; border-radius: 6px; display: none; font-size: 0.9em;"></div>
+                <button type="submit" style="width: 100%; margin-top: 25px; padding: 15px; font-size: 1em;">
+                    <img src="img/salvado.png" alt="guardar" class="btn-icon"> Guardar Cambios
+                </button>
             </form>
         </div>
     </main>
