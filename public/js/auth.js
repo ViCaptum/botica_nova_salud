@@ -1,6 +1,4 @@
-// ==========================================
-// 1. EL GUARDIA DE SEGURIDAD GLOBAL[cite: 32]
-// ==========================================
+// 1. EL GUARDIA DE SEGURIDAD GLOBAL
 function protegerRutas() {
     const paginaActual = window.location.pathname;
     const token = localStorage.getItem('token_botica');

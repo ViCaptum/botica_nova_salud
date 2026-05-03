@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Inventario - Botica Nova Salud</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- Enlace a Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,9 +11,7 @@
 <body>
 
     <main>
-        <!-- ALERTAS DE STOCK -->
         <section id="alertas-stock" style="margin-bottom: 15px;"></section>
-        <!-- Sección de Filtros -->
         <section id="seccion-filtros">
             <input type="text" id="input-buscar" placeholder="Buscar por nombre o código...">
             <select id="select-tipo">
@@ -22,12 +19,10 @@
                 <option value="generico">Solo Genéricos</option>
                 <option value="marca">Solo De Marca</option>
             </select>
-            <!-- El botón de buscar queda solo como respaldo visual, la búsqueda será automática -->
             <button id="btn-buscar" style="display: none;">Buscar</button>
             <button id="btn-nuevo-producto" style="display: none;">+ Nuevo Producto</button>
         </section>
 
-        <!-- Tabla de Resultados -->
         <section>
             <table>
                 <thead>
@@ -48,7 +43,6 @@
             </table>
         </section>
 
-        <!-- MODAL FLOTANTE PARA CREAR/EDITAR -->
         <div id="modal-producto" class="modal-overlay" style="display: none;">
             <div class="modal-content">
                 <h2 id="titulo-formulario" style="margin-bottom: 20px; color: var(--color-primario);">Nuevo Producto</h2>

@@ -78,7 +78,7 @@ router.delete('/categorias/:id', auth, validarRol([ROLES.ADMIN]), async (req, re
     }
 });
 
-// DELETE: Eliminar laboratorio (SOLO ADMIN)[cite: 27]
+// DELETE
 router.delete('/laboratorios/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
     try {
         const { id } = req.params;

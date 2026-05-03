@@ -12,12 +12,8 @@
 <body>
 
     <main class="pos-layout">
-        <!-- ========================================== -->
-        <!-- COLUMNA IZQUIERDA: PRODUCTOS Y CLIENTE -->
-        <!-- ========================================== -->
         <div class="pos-main">
             
-            <!-- 1. SECCIÓN CLIENTE (Más compacta) -->
             <section style="padding: 15px 20px; margin-bottom: 15px;">
                 <div style="display: flex; gap: 15px; align-items: flex-end;">
                     <div style="flex-grow: 1; margin-bottom: 0;">
@@ -27,7 +23,6 @@
                     <button id="btn-buscar-cliente" style="white-space: nowrap;"><img src="img/buscar.png" alt="buscar" class="btn-icon"> Buscar</button>
                 </div>
 
-                <!-- Mini-formulario oculto -->
                 <div id="seccion-nuevo-cliente" style="display: none; background-color: var(--bg-fondo); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px dashed var(--color-primario);">
                     <h3 style="color: var(--color-secundario); font-size: 1.1em; margin-bottom: 10px;">Registrar Cliente Rápido</h3>
                     <div class="form-grid">
@@ -41,7 +36,6 @@
                 </div>
             </section>
 
-            <!-- 2. CATÁLOGO DE PRODUCTOS (GRID) -->
             <section style="padding: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h2 style="margin: 0;">Catálogo Rápido</h2>
@@ -55,9 +49,6 @@
             </section>
         </div>
 
-        <!-- ========================================== -->
-        <!-- COLUMNA DERECHA: CARRITO FIJO (TICKET) -->
-        <!-- ========================================== -->
         <aside class="pos-cart-panel">
             <div class="cart-header">
                 <h3>Resumen de Venta</h3>

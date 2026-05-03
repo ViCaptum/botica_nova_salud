@@ -5,7 +5,7 @@ const SECRET_KEY = process.env.JWT_SECRET;
 // MIddleware de autenticación
 const auth = (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
+        const token = req.headers['authorization']; 
 
         if (!token) {
             return res.status(401).json({ error: 'Token requerido' });

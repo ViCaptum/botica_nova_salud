@@ -12,6 +12,49 @@ const ROLES = {
     VENDEDOR: 2
 };
 
+router.get('/perfil/me', auth, async (req, res) => {
+    try {
+        // req.usuario.id viene del token decodificado por el middleware auth
+        const [usuarios] = await pool.query('SELECT * FROM USUARIOS WHERE id_usuario = ?', [req.usuario.id]);
+        
+        if (usuarios.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+        
+        res.json(usuarios[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener perfil' });
+    }
+});
+
+router.put('/perfil/me', auth, async (req, res) => {
+    try {
+        const { username, correo, telefono, password_actual, password_nueva } = req.body;
+        const id_usuario = req.usuario.id;
+
+        const [usuarios] = await pool.query('SELECT * FROM USUARIOS WHERE id_usuario = ?', [id_usuario]);
+        const usuario = usuarios[0];
+
+        const esValida = await bcrypt.compare(password_actual, usuario.password_hash);
+        if (!esValida) {
+            return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+        }
+
+        let passFinal = usuario.password_hash;
+        if (password_nueva && password_nueva.trim() !== "") {
+            passFinal = await bcrypt.hash(password_nueva, 10);
+        }
+
+        await pool.query(
+            'UPDATE USUARIOS SET username = ?, correo = ?, telefono = ?, password_hash = ? WHERE id_usuario = ?',
+            [username, correo, telefono, passFinal, id_usuario]
+        );
+
+        res.json({ mensaje: 'Perfil actualizado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al actualizar el perfil' });
+    }
+});
+
 // Registro de usuario con validación de rol y hash de contraseña
 router.post('/registro', async (req, res) => {
     try {
@@ -115,6 +158,59 @@ router.get('/dashboard', auth, validarRol([ROLES.ADMIN, ROLES.VENDEDOR]), (req, 
         mensaje: 'Acceso permitido',
         usuario: req.usuario
     });
+});
+
+// 1. Obtener todos los usuarios (Directorio)
+router.get('/', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
+    try {
+        const query = `
+            SELECT id_usuario AS id, nombre, apellidos, telefono, correo, username, id_rol AS rol 
+            FROM USUARIOS
+        `;
+        const [usuarios] = await pool.query(query);
+        res.json(usuarios);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener la lista de empleados' });
+    }
+});
+
+// 2. Editar datos de un empleado (Modal de Edición)
+router.put('/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, apellidos, telefono, id_rol } = req.body;
+
+        const query = `
+            UPDATE USUARIOS 
+            SET nombre = ?, apellidos = ?, telefono = ?, id_rol = ? 
+            WHERE id_usuario = ?
+        `;
+        
+        await pool.query(query, [nombre, apellidos, telefono, id_rol, id]);
+        res.json({ mensaje: 'Empleado actualizado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al actualizar el empleado' });
+    }
+});
+
+// 3. Eliminar (Despedir) un empleado
+router.delete('/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Evitar que un admin se elimine a sí mismo
+        if (parseInt(id) === req.usuario.id) {
+            return res.status(400).json({ error: 'No puedes eliminar tu propia cuenta administrativa' });
+        }
+
+        await pool.query('DELETE FROM USUARIOS WHERE id_usuario = ?', [id]);
+        res.json({ mensaje: 'Empleado eliminado del sistema' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al eliminar el empleado' });
+    }
 });
 
 module.exports = router;

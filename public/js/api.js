@@ -23,7 +23,6 @@ async function hacerPeticion(endpoint, metodo = 'GET', body = null) {
         const response = await fetch(`${API_URL}${endpoint}`, config);
         const data = await response.json();
 
-        // 🔐 Seguridad
         if (response.status === 401 || response.status === 403) {
             alert('Tu sesión ha expirado o no tienes permisos.');
             localStorage.removeItem('token_botica');
@@ -32,12 +31,11 @@ async function hacerPeticion(endpoint, metodo = 'GET', body = null) {
             throw new Error('No autorizado');
         }
 
-        // ❌ Error del backend
+        // Error del backend
         if (!response.ok) {
             throw new Error(data.error || 'Error del servidor');
         }
 
-        // 🧠 🔥 AQUÍ ESTÁ LA MAGIA
         // Si viene con envelope → devolver solo data
         if (data.ok !== undefined) {
             return data.data;

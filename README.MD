@@ -23,6 +23,7 @@ DB_USER=root
 DB_PASSWORD=
 DB_NAME=botica_nova_salud
 DB_PORT=3306
+JWT_SECRET=mi_clave_ultra_secreta
 ```
 
 #### 4. BASE DE DATOS

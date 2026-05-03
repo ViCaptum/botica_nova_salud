@@ -4,19 +4,15 @@
     <meta charset="UTF-8">
     <title>Gestión de Empleados - Botica Nova Salud</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- Enlace a Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <!-- MODAL DE DETALLES Y EDICIÓN (ADMIN) CORREGIDO -->
     <div id="modal-editar-emp" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px;">
             <h2 style="color: var(--color-primario); margin-bottom: 20px;"><img src="img/empleado.png" alt="det-empleado" class="icons-md"> Detalles del Empleado</h2>
             
-            <!-- ID CORREGIDO PARA EVITAR DUPLICIDAD -->
             <form id="form-editar-emp" class="form-grid">
                 <input type="hidden" id="edit-id">
                 
@@ -61,7 +57,7 @@
         </div>
 
         <div class="admin-layout">
-            <!-- COLUMNA IZQ: FORMULARIO COMPACTO -->
+            <!-- COLUMNA IZQ-->
             <section style="padding: 15px; margin: 0; max-height: 90vh; overflow-y: auto;">
                 <h3 style="margin-bottom: 15px; font-size: 1.1em;"><img src="img/nueva-cuenta.png" alt="agregar" class="icons-md"> Alta de Personal</h3>
                 <form id="form-registro">
@@ -81,7 +77,6 @@
                         </div>
                     </div>
 
-                    <!-- Acceso Automatizado -->
                     <div class="seccion-formulario" style="padding: 12px; margin-bottom: 12px;">
                         <h3 style="font-size: 0.95em; margin-bottom: 10px;">🔐 Acceso</h3>
                         <select id="reg-rol" style="padding: 8px; margin-bottom: 8px; cursor: pointer;">
@@ -93,7 +88,7 @@
                         </div>
                     </div>
                     
-                    <!-- Contenedores de mensajes más pequeños -->
+                    <!-- Contenedores de mensajes -->
                     <div id="msg-error-registro" style="color: var(--error); display: none; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
                     <div id="msg-exito-registro" style="color: var(--exito); display: none; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--color-primario); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
                     
@@ -101,7 +96,7 @@
                 </form>
             </section>
 
-            <!-- COLUMNA DER: DIRECTORIO (TABLA) -->
+            <!-- COLUMNA DER -->
             <section style="padding: 25px; margin: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                     <h3 style="margin: 0; color: var(--color-primario);"><img src="img/directorio-telefonico.png" alt="directorio" class="icons-md"> Directorio</h3>

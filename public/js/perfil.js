@@ -28,14 +28,13 @@ formPerfil.addEventListener('submit', async (e) => {
         const res = await API.put('/usuarios/perfil/me', payload);
         mostrarMensaje(`✅ ${res.mensaje}`, true);
         
-        // Limpiar campos de clave
         document.getElementById('perfil-pass-actual').value = '';
         document.getElementById('perfil-pass-nueva').value = '';
         
         // Recargamos datos para confirmar cambios
         cargarDatosPerfil(); 
     } catch (err) {
-        mostrarMensaje(`❌ ${err.message}`, false); // Aquí saltará el "Usuario ya en uso" si MySQL detecta el duplicado[cite: 30]
+        mostrarMensaje(`❌ ${err.message}`, false); // Aquí saltará el "Usuario ya en uso" si MySQL detecta el duplicado
     }
 });
 

@@ -12,24 +12,21 @@
 <body>
 
     <main>
-        <!-- Cambiamos el padding a 30px para que respire más y quitamos estilos forzados -->
         <div class="perfil-container"> 
             <div class="user-avatar"><img src="img/perfil-del-usuario.png" alt="perfil" class="icons-lg"></div>
             <h2 id="perfil-nombre" style="text-align: center; color: var(--color-primario); margin-bottom: 5px;">cargando..</h2>
             <p style="text-align: center; color: var(--texto-secundario); font-size: 0.95em; margin-bottom: 30px;">
-                Rol: <span id="perfil-rol">cargando</span>
+                Rol: <span id="perfil-rol">cargando..</span>
             </p>
 
             <form id="form-perfil">
                 <h3 style="font-size: 1.1em; border-bottom: 1px solid var(--borde); padding-bottom: 8px; margin-bottom: 20px;">Información de Cuenta</h3>
-                
-                <!-- Cambiamos a una sola columna o gap mayor para que no se amontone -->
+            
                 <div class="form-grid" style="grid-template-columns: 1fr; gap: 15px;">
                     <div>
                         <label>Nombre de Usuario:</label>
                         <input type="text" id="perfil-username-input" required>
                     </div>
-                    <!-- Agrupamos Correo y Teléfono en 2 columnas solo si hay espacio -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div>
                             <label>Correo Electrónico:</label>
