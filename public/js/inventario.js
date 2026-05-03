@@ -226,11 +226,36 @@ async function cargarAlertasStock() {
             </ul>
         `;
 
-        contenedorAlertas.appendChild(div);
+        // Mostrar toast por cada producto
+        alertas.forEach(p => {
+            mostrarToast(`⚠️ ${p.nombre_producto} con stock bajo (${p.stock_actual})`);
+        });
 
     } catch (error) {
         console.error("Error cargando alertas:", error);
     }
+}
+
+// Función para mostrar un toast de error (puede ser reutilizada en otros contextos)
+function mostrarToast(mensaje) {
+    const container = document.getElementById('toast-container');
+
+    const toast = document.createElement('div');
+    toast.style.background = '#dc3545';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 16px';
+    toast.style.marginBottom = '10px';
+    toast.style.borderRadius = '8px';
+    toast.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
+    toast.style.animation = 'fadeIn 0.3s ease';
+
+    toast.textContent = mensaje;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
 }
 
 // Carga inicial del inventario y catálogos al cargar la página
