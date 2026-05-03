@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 
 const { auth, validarRol } = require('../middlewares/auth');
+const { success, error } = require('../utils/response');
 
 const ROLES = {
     ADMIN: 1,
@@ -28,27 +29,45 @@ router.get('/', auth, async (req, res) => {
         const [productos] = await pool.query(query, valores);
         res.json(productos);
 
-    } catch (error) {
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Error al obtener inventario' });
+    }
+});
+
+// Obtener productos con stock bajo (ADMIN Y VENDEDOR)
+router.get('/alertas', auth, async (req, res) => {
+    try {
+        const [productos] = await pool.query(`
+            SELECT id_producto, nombre_producto, stock_actual, stock_minimo
+            FROM PRODUCTOS
+            WHERE stock_actual <= stock_minimo
+        `);
+
+        success(res, productos, 'Productos con stock bajo');
+
+    } catch (err) {
+        console.error(err);
+        error(res, 'Error al obtener alertas');
     }
 });
 
 // Crear producto (SOLO ADMIN)
 router.post('/', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
     try {
-        const {
-            id_categoria,
-            id_laboratorio,
-            codigo_barras,
-            nombre_producto,
-            es_generico,
-            precio_venta,
-            stock_actual,
-            stock_minimo
+        const { 
+            id_categoria, 
+            id_laboratorio, 
+            codigo_barras, 
+            nombre_producto, 
+            es_generico, 
+            precio_venta, 
+            stock_actual, 
+            stock_minimo 
         } = req.body;
 
-        if (!nombre_producto || precio_venta <= 0) {
-            return res.status(400).json({ error: 'Datos inválidos' });
+        if (!nombre_producto || !precio_venta || !id_categoria) {
+            return error(res, 'Faltan campos obligatorios', 400);
         }
 
         const query = `
@@ -57,21 +76,31 @@ router.post('/', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-        const [resultado] = await pool.query(query, [
-            id_categoria,
-            id_laboratorio,
-            codigo_barras,
-            nombre_producto,
-            es_generico,
-            precio_venta,
-            stock_actual || 0,
-            stock_minimo || 0
-        ]);
+        const valores = [
+            id_categoria, 
+            id_laboratorio, 
+            codigo_barras, 
+            nombre_producto, 
+            es_generico, 
+            precio_venta, 
+            stock_actual, 
+            stock_minimo
+        ];
 
-        res.status(201).json({ id_producto: resultado.insertId });
+        const [resultado] = await pool.query(query, valores);
 
-    } catch (error) {
-        res.status(500).json({ error: 'Error al crear producto' });
+        success(res, {
+            id_producto: resultado.insertId
+        }, 'Producto creado correctamente', 201);
+
+    } catch (err) {
+        console.error(err);
+
+        if (err.code === 'ER_DUP_ENTRY') {
+            return error(res, 'Código de barras duplicado', 409);
+        }
+
+        error(res, 'Error al crear producto');
     }
 });
 
@@ -80,19 +109,55 @@ router.put('/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
     try {
         const { id } = req.params;
 
-        const query = `UPDATE PRODUCTOS SET ? WHERE id_producto = ?`;
-        const [resultado] = await pool.query(query, [req.body, id]);
+        const { 
+            id_categoria, 
+            id_laboratorio, 
+            codigo_barras, 
+            nombre_producto, 
+            es_generico, 
+            precio_venta, 
+            stock_actual, 
+            stock_minimo 
+        } = req.body;
 
-        if (resultado.affectedRows === 0) {
-            return res.status(404).json({ error: 'Producto no encontrado' });
+        if (!nombre_producto || !precio_venta) {
+            return error(res, 'Faltan campos obligatorios', 400);
         }
 
-        res.json({ mensaje: 'Actualizado' });
+        const query = `
+            UPDATE PRODUCTOS 
+            SET id_categoria = ?, id_laboratorio = ?, codigo_barras = ?, 
+                nombre_producto = ?, es_generico = ?, precio_venta = ?, 
+                stock_actual = ?, stock_minimo = ?
+            WHERE id_producto = ?
+        `;
 
-    } catch {
-        res.status(500).json({ error: 'Error al actualizar' });
+        const valores = [
+            id_categoria, 
+            id_laboratorio, 
+            codigo_barras, 
+            nombre_producto, 
+            es_generico, 
+            precio_venta, 
+            stock_actual, 
+            stock_minimo,
+            id
+        ];
+
+        const [resultado] = await pool.query(query, valores);
+
+        if (resultado.affectedRows === 0) {
+            return error(res, 'Producto no encontrado', 404);
+        }
+
+        success(res, null, 'Producto actualizado correctamente');
+
+    } catch (err) {
+        console.error(err);
+        error(res, 'Error al actualizar producto');
     }
 });
+
 
 // Eliminar producto (SOLO ADMIN)
 router.delete('/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {

@@ -6,9 +6,7 @@ const { auth, validarRol } = require('../middlewares/auth');
 
 const ROLES = { ADMIN: 1, VENDEDOR: 2 };
 
-// ==========================================
-// RUTAS PARA CATEGORÍAS
-// ==========================================
+// Rutas para categorías
 
 // GET: Listar todas las categorías (Accesible para todos)
 router.get('/categorias', auth, async (req, res) => {
@@ -36,9 +34,7 @@ router.post('/categorias', auth, validarRol([ROLES.ADMIN]), async (req, res) => 
     }
 });
 
-// ==========================================
-// RUTAS PARA LABORATORIOS
-// ==========================================
+// Rutas para laboratorios
 
 // GET: Listar todos los laboratorios
 router.get('/laboratorios', auth, async (req, res) => {

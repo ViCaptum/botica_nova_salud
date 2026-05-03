@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = 'tu_secreto_super_seguro'; // luego lo pasas a .env
+const SECRET_KEY = process.env.JWT_SECRET; 
 
-// 🔐 Middleware de autenticación
+// MIddleware de autenticación
 const auth = (req, res, next) => {
     try {
         const token = req.headers['authorization'];
@@ -25,7 +25,7 @@ const auth = (req, res, next) => {
     }
 };
 
-// 🛡️ Middleware de roles
+// Middleware de roles
 const validarRol = (rolesPermitidos) => {
     return (req, res, next) => {
         if (!req.usuario || !rolesPermitidos.includes(req.usuario.rol)) {

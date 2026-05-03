@@ -1,5 +1,10 @@
+// Archivo principal de la aplicación
+require('dotenv').config();
+// Importamos Express
 const express = require('express');
+// Creamos la aplicación usando Express
 const app = express();
+// Puerto de la aplicación
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());//para que la se use json y no de errores
