@@ -64,17 +64,20 @@ function renderizarCatalogo(productos) {
     });
 }
 
+// Para evitar mostrar múltiples alertas del mismo producto si el usuario recarga varias veces
+let alertasMostradas = new Set();
+// Verifica si algún producto está en stock crítico y muestra una alerta
 function verificarStockCritico(productos) {
-    const productosEnPeligro = productos.filter(p => p.stock_actual <= (p.stock_minimo || 5));
-    
-    if (productosEnPeligro.length > 0 && !alertaEmitida) {
-        const mensaje = new SpeechSynthesisUtterance(`Atención. Hay ${productosEnPeligro.length} medicamentos con stock bajo en la botica.`);
-        mensaje.lang = 'es-ES'; 
-        mensaje.rate = 1.0;     
-        
-        window.speechSynthesis.speak(mensaje);
-        alertaEmitida = true; 
-    }
+    const productosEnPeligro = productos.filter(
+        p => p.stock_actual <= (p.stock_minimo || 5)
+    );
+
+    productosEnPeligro.forEach(p => {
+        if (!alertasMostradas.has(p.id_producto)) {
+            mostrarToast(`⚠️ ${p.nombre_producto} con stock bajo (${p.stock_actual})`);
+            alertasMostradas.add(p.id_producto);
+        }
+    });
 }
 
 // Eventos[cite: 26]
