@@ -13,6 +13,9 @@ const tituloFormulario = document.getElementById('titulo-formulario');
 const usuario = JSON.parse(localStorage.getItem('usuario_botica') || '{}');
 const esAdmin = usuario.rol === 1;
 
+// Contenedor para mostrar alertas de stock bajo el título
+const contenedorAlertas = document.getElementById('alertas-stock');
+
 if (esAdmin && btnNuevo) {
     btnNuevo.style.display = 'inline-block';
 }
@@ -126,6 +129,7 @@ window.editarProducto = function(productoEncoded) {
     abrirModal();
 };
 
+// Maneja el envío del formulario tanto para creación como para edición
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
     const idProducto = document.getElementById('prod-id').value;
@@ -152,25 +156,26 @@ formProducto.addEventListener('submit', async (e) => {
         
         cerrarModal();
         cargarInventarioCompleto(); 
+        cargarAlertasStock();
     } catch (error) {
         alert("Error al guardar: " + error.message);
     }
 });
 
+// Elimina un producto del inventario (Solo para admins)
 window.eliminarProducto = async function(id) {
     if(confirm("¿Estás seguro de eliminar este producto del inventario? Esta acción no se puede deshacer.")) {
         try {
             await API.delete(`/inventario/${id}`);
             cargarInventarioCompleto();
+            cargarAlertasStock();
         } catch (error) {
             alert("No se puede eliminar: " + error.message);
         }
     }
 };
 
-// ==========================================
 // 4. INICIALIZACIÓN Y CATÁLOGOS
-// ==========================================
 async function cargarCatalogosFormulario() {
     try {
         const [categorias, laboratorios] = await Promise.all([
@@ -192,7 +197,45 @@ async function cargarCatalogosFormulario() {
     }
 }
 
+// 5. ALERTAS DE STOCK BAJO
+async function cargarAlertasStock() {
+    try {
+        const alertas = await API.get('/inventario/alertas');
+
+        contenedorAlertas.innerHTML = '';
+
+        if (!alertas || alertas.length === 0) {
+            return;
+        }
+
+        const div = document.createElement('div');
+        div.style.background = '#fff3cd';
+        div.style.border = '1px solid #ffeeba';
+        div.style.padding = '10px';
+        div.style.borderRadius = '8px';
+
+        div.innerHTML = `
+            <strong>⚠️ Productos con bajo stock:</strong>
+            <ul style="margin-top: 8px;">
+                ${alertas.map(p => `
+                    <li>
+                        ${p.nombre_producto} 
+                        (Stock: ${p.stock_actual} / Min: ${p.stock_minimo})
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+
+        contenedorAlertas.appendChild(div);
+
+    } catch (error) {
+        console.error("Error cargando alertas:", error);
+    }
+}
+
+// Carga inicial del inventario y catálogos al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     cargarInventarioCompleto();
     cargarCatalogosFormulario();
+    cargarAlertasStock();
 });
