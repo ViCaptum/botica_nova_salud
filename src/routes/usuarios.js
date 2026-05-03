@@ -212,5 +212,5 @@ router.delete('/:id', auth, validarRol([ROLES.ADMIN]), async (req, res) => {
         res.status(500).json({ error: 'Error al eliminar el empleado' });
     }
 });
-
+//waza
 module.exports = router;
