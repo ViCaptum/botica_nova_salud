@@ -9,6 +9,7 @@ const ROLES = {
     VENDEDOR: 2
 };
 
+// Ruta para crear una nueva venta
 router.post('/', auth, validarRol([ROLES.ADMIN, ROLES.VENDEDOR]), async (req, res) => {
     const connection = await pool.getConnection();
 
@@ -71,6 +72,49 @@ router.post('/', auth, validarRol([ROLES.ADMIN, ROLES.VENDEDOR]), async (req, re
     }
 });
 
+// Ruta para obtener el detalle de una venta específica
+router.get('/:id', auth, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Cabecera
+        const [venta] = await pool.query(`
+            SELECT v.id_venta, v.fecha_venta, v.total_venta,
+                   c.dni AS cliente_dni,
+                   CONCAT(c.nombres, ' ', c.apellidos) AS cliente_nombre,
+                   u.nombre AS vendedor
+            FROM VENTAS v
+            LEFT JOIN CLIENTES c ON v.id_cliente = c.id_cliente
+            INNER JOIN USUARIOS u ON v.id_usuario = u.id_usuario
+            WHERE v.id_venta = ?
+        `, [id]);
+
+        if (venta.length === 0) {
+            return res.status(404).json({ error: 'Venta no encontrada' });
+        }
+
+        // Detalles
+        const [detalle] = await pool.query(`
+            SELECT d.cantidad, d.precio_unitario, d.subtotal,
+                   p.nombre_producto
+            FROM DETALLE_VENTAS d
+            INNER JOIN PRODUCTOS p ON d.id_producto = p.id_producto
+            WHERE d.id_venta = ?
+        `, [id]);
+
+        res.json({
+            venta: venta[0],
+            detalle
+        });
+
+    } catch (error) {
+        console.error("Error detalle venta:", error);
+        res.status(500).json({ error: 'Error al obtener detalle' });
+    }
+});
+
+
+// Ruta para obtener el historial de ventas, con filtro opcional por vendedor
 router.get('/', auth, async (req, res) => {
     try {
         const { vendedor_id } = req.query;

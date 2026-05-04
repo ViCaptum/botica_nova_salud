@@ -1,13 +1,9 @@
-// ==========================================
-// ESTADO GLOBAL DE LA VENTA Y CACHÉ
-// ==========================================
+// Variables globales para la "caché" en memoria
 let inventarioGlobal = []; // Caché de productos
 let carrito = [];          // Items que el cliente quiere comprar
 let totalVenta = 0.00;     // Dinero total
 
-// ==========================================
-// REFERENCIAS AL DOM (UI)
-// ==========================================
+//Referencias a elementos del DOM
 const gridProductos = document.getElementById('grid-productos-venta');
 const inputBuscarProd = document.getElementById('input-buscar-prod-venta');
 const contenedorCarrito = document.getElementById('contenedor-items-carrito');
@@ -21,9 +17,7 @@ const lblNombreCliente = document.getElementById('lbl-nombre-cliente');
 const hiddenClienteId = document.getElementById('cliente-id-seleccionado');
 const seccionNuevoCliente = document.getElementById('seccion-nuevo-cliente');
 
-// ==========================================
-// 1. LÓGICA DEL CLIENTE (Búsqueda y Registro Rápido)
-// ==========================================
+// Botón para buscar cliente por DNI
 btnBuscarCliente.addEventListener('click', async () => {
     const dni = inputDni.value.trim();
     if (dni.length === 0) return;
@@ -46,6 +40,7 @@ btnBuscarCliente.addEventListener('click', async () => {
     }
 });
 
+// Botón para cancelar el registro rápido
 document.getElementById('btn-cancelar-cliente').addEventListener('click', () => {
     seccionNuevoCliente.style.display = 'none';
     inputDni.value = '';
@@ -53,6 +48,7 @@ document.getElementById('btn-cancelar-cliente').addEventListener('click', () => 
     lblNombreCliente.style.color = "var(--color-primario)";
 });
 
+// Botón para guardar el nuevo cliente
 document.getElementById('btn-guardar-cliente-rapido').addEventListener('click', async () => {
     const dni = inputDni.value.trim();
     const nombres = document.getElementById('nuevo-cli-nombres').value.trim();
@@ -78,9 +74,7 @@ document.getElementById('btn-guardar-cliente-rapido').addEventListener('click', 
     }
 });
 
-// ==========================================
-// 2. CARGAR Y MOSTRAR CATÁLOGO DE PRODUCTOS (GRILLA)
-// ==========================================
+// Carga el catálogo de productos al iniciar la página
 async function cargarCatalogoParaVenta() {
     try {
         inventarioGlobal = await API.get('/inventario');
@@ -90,6 +84,7 @@ async function cargarCatalogoParaVenta() {
     }
 }
 
+// Función para renderizar los productos en la grilla
 function renderizarGridProductos(productos) {
     gridProductos.innerHTML = '';
     
@@ -126,9 +121,7 @@ inputBuscarProd.addEventListener('input', (e) => {
     renderizarGridProductos(filtrados);
 });
 
-// ==========================================
-// 3. LÓGICA DEL CARRITO INTERACTIVO
-// ==========================================
+// Logica para agregar al carrito (memoria) y luego renderizar el carrito en la UI
 window.agregarAlCarrito = function(idProducto) {
     const productoDB = inventarioGlobal.find(p => p.id_producto === idProducto);
     const itemExistente = carrito.find(item => item.id_producto === idProducto);
@@ -152,6 +145,7 @@ window.agregarAlCarrito = function(idProducto) {
     renderizarCarritoUI();
 };
 
+// Función para renderizar el carrito en la UI
 function renderizarCarritoUI() {
     contenedorCarrito.innerHTML = '';
     totalVenta = 0;
@@ -190,6 +184,7 @@ function renderizarCarritoUI() {
     btnProcesarVenta.disabled = false;
 }
 
+// Funciones para cambiar cantidad y quitar del carrito
 window.cambiarCantidad = function(index, delta) {
     const item = carrito[index];
     const productoDB = inventarioGlobal.find(p => p.id_producto === item.id_producto);
@@ -210,9 +205,7 @@ window.quitarDelCarrito = function(index) {
     renderizarCarritoUI();
 };
 
-// ==========================================
-// 4. PROCESAR VENTA FINAL (Conexión Backend)
-// ==========================================
+// Procesar la venta: Enviar datos al backend y manejar la respuesta
 btnProcesarVenta.addEventListener('click', async () => {
     if (carrito.length === 0) return;
 
@@ -235,7 +228,7 @@ btnProcesarVenta.addEventListener('click', async () => {
     try {
         const resultado = await API.post('/ventas', payloadVenta);
         
-        alert(`✅ Venta procesada exitosamente.\nID de Transacción: #${resultado.id_venta}`);
+        alert(`Venta procesada exitosamente.\nID de Transacción: #${resultado.id_venta}`);
         
         // Vaciamos la memoria para el siguiente cliente
         carrito = [];
@@ -249,11 +242,9 @@ btnProcesarVenta.addEventListener('click', async () => {
         renderizarCarritoUI();
 
     } catch (error) {
-        alert(`❌ Error al procesar la venta: ${error.message}`);
+        alert(`Error al procesar la venta: ${error.message}`);
     }
 });
 
-// ==========================================
-// INICIALIZACIÓN
-// ==========================================
+// Iniciamos la carga del catálogo al abrir la página
 document.addEventListener('DOMContentLoaded', cargarCatalogoParaVenta);

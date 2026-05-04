@@ -1,5 +1,5 @@
 // ==========================================
-// 1. REFERENCIAS AL DOM
+// REFERENCIAS DOM
 // ==========================================
 const tbodyHistorial = document.getElementById('tabla-historial-body');
 const inputVendedor = document.getElementById('input-buscar-vendedor');
@@ -7,15 +7,13 @@ const idVendedorSeleccionado = document.getElementById('vendedor-id-seleccionado
 const listaEmpleados = document.getElementById('lista-empleados');
 const btnFiltrar = document.getElementById('btn-filtrar-ventas');
 
-// Variables globales para la "caché" en memoria
 let empleadosCache = [];
 
 // ==========================================
-// 2. CARGAR Y RENDERIZAR TABLA PRINCIPAL
+// CARGAR HISTORIAL
 // ==========================================
 async function cargarHistorial(idEmpleado = '') {
     try {
-        // Construimos la ruta. Si hay un ID de empleado, filtramos desde el backend
         let endpoint = '/ventas';
         if (idEmpleado) {
             endpoint += `?vendedor_id=${idEmpleado}`;
@@ -23,124 +21,146 @@ async function cargarHistorial(idEmpleado = '') {
 
         const ventas = await API.get(endpoint);
         renderizarHistorial(ventas);
+
     } catch (error) {
-        console.error("Error al cargar el historial:", error);
-        tbodyHistorial.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--error);">Error de conexión con el servidor.</td></tr>`;
+        tbodyHistorial.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;color:red;">
+                    Error cargando historial
+                </td>
+            </tr>`;
     }
 }
 
+// ==========================================
+// RENDER TABLA
+// ==========================================
 function renderizarHistorial(ventas) {
     tbodyHistorial.innerHTML = '';
 
     if (ventas.length === 0) {
-        tbodyHistorial.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--texto-secundario);">No se encontraron ventas registradas para esta búsqueda.</td></tr>';
+        tbodyHistorial.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    Sin resultados
+                </td>
+            </tr>`;
         return;
     }
 
     ventas.forEach(venta => {
         const tr = document.createElement('tr');
-        
-        // Formateamos la fecha para que se vea legible en formato Perú (Día/Mes/Año Hora)
-        const fechaNativa = new Date(venta.fecha_venta);
-        const fechaFormateada = fechaNativa.toLocaleString('es-PE', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
+
+        const fecha = new Date(venta.fecha_venta).toLocaleString('es-PE');
 
         tr.innerHTML = `
-            <td style="font-family: monospace; font-weight: bold; color: var(--texto-secundario);">#${venta.id_venta}</td>
-            <td>${fechaFormateada}</td>
-            <td style="font-weight: 500;">${venta.nombre_vendedor || 'Desconocido'}</td>
+            <td>#${venta.id_venta}</td>
+            <td>${fecha}</td>
+            <td>${venta.nombre_vendedor}</td>
             <td>${venta.dni_cliente || 'Público General'}</td>
-            <td style="font-weight: bold; color: var(--color-primario);">S/ ${parseFloat(venta.total).toFixed(2)}</td>
+            <td>S/ ${parseFloat(venta.total).toFixed(2)}</td>
             <td>
-                <button onclick="verDetallesVenta(${venta.id_venta})" style="padding: 6px 12px; font-size: 0.85em; background-color: transparent; border: 1px solid var(--color-secundario); color: var(--color-secundario);">
-                    <img src="img/expediente.png" alt="buscar" class="btn-icon">Detalles
+                <button onclick="verDetalleVenta(${venta.id_venta})">
+                    📄 Ver
                 </button>
             </td>
         `;
+
         tbodyHistorial.appendChild(tr);
     });
 }
 
 // ==========================================
-// 3. LÓGICA DE AUTOCOMPLETADO (EMPLEADOS)
+// DETALLE DE VENTA (🔥 LO IMPORTANTE)
 // ==========================================
-
-// Descargamos los empleados una sola vez al abrir la página
-async function prepararAutocompletado() {
+window.verDetalleVenta = async function(idVenta) {
     try {
-        empleadosCache = await API.get('/usuarios'); 
-    } catch (error) {
-        console.error("Error al cargar empleados para autocompletado:", error);
-    }
-}
+        const data = await API.get(`/ventas/${idVenta}`);
 
-// Escuchamos cada vez que el usuario escribe en la caja de texto
-inputVendedor.addEventListener('input', (e) => {
-    const textoBuscado = e.target.value.toLowerCase().trim();
-    listaEmpleados.innerHTML = ''; // Limpiamos la lista desplegable
+        const venta = data.venta;
+        const detalle = data.detalle;
 
-    // Si borra el texto, escondemos la lista y limpiamos el ID oculto
-    if (!textoBuscado) {
-        listaEmpleados.style.display = 'none';
-        idVendedorSeleccionado.value = ''; 
-        cargarHistorial(); // Opcional: Recargar todo el historial si borra el filtro
-        return;
-    }
+        // Info
+        document.getElementById('info-venta').innerHTML = `
+            <p><strong>ID:</strong> ${venta.id_venta}</p>
+            <p><strong>Fecha:</strong> ${venta.fecha}</p>
+            <p><strong>Vendedor:</strong> ${venta.usuario_nombre}</p>
+            <p><strong>Cliente:</strong> ${venta.cliente_nombre || 'Público General'}</p>
+            <p><strong>Total:</strong> S/ ${parseFloat(venta.total_venta).toFixed(2)}</p>
+        `;
 
-    // Buscamos coincidencias en la memoria (por nombre)
-    const filtrados = empleadosCache.filter(emp => 
-        emp.nombre.toLowerCase().includes(textoBuscado) || 
-        (emp.username && emp.username.toLowerCase().includes(textoBuscado))
-    );
+        // Tabla detalle
+        const tbody = document.getElementById('detalle-body');
+        tbody.innerHTML = '';
 
-    // Si hay resultados, los mostramos
-    if (filtrados.length > 0) {
-        filtrados.forEach(emp => {
-            const divOpcion = document.createElement('div');
-            // Mostramos el nombre y el rol para ser más precisos
-            const rolTxt = emp.rol === 1 ? 'Admin' : 'Vendedor';
-            divOpcion.textContent = `${emp.nombre} (${rolTxt})`;
-            
-            // Al hacer clic en un nombre de la lista:
-            divOpcion.addEventListener('click', () => {
-                inputVendedor.value = emp.nombre;       // Ponemos el nombre en el input visible
-                idVendedorSeleccionado.value = emp.id;  // Guardamos el ID real en el input oculto
-                listaEmpleados.style.display = 'none';  // Escondemos la lista
-            });
-            
-            listaEmpleados.appendChild(divOpcion);
+        detalle.forEach(item => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.nombre_producto}</td>
+                    <td>${item.cantidad}</td>
+                    <td>S/ ${item.precio_unitario}</td>
+                    <td>S/ ${item.subtotal}</td>
+                </tr>
+            `;
         });
-        listaEmpleados.style.display = 'block';
-    } else {
-        listaEmpleados.style.display = 'none';
+
+        document.getElementById('modal-detalle').style.display = 'flex';
+
+    } catch (error) {
+        alert("Error: " + error.message);
     }
-});
-
-// Cerrar la lista de autocompletado si el usuario hace clic en otra parte de la pantalla
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.autocomplete-container')) {
-        listaEmpleados.style.display = 'none';
-    }
-});
-
-// ==========================================
-// 4. EVENTOS PRINCIPALES
-// ==========================================
-
-// Botón de Filtrar
-btnFiltrar.addEventListener('click', () => {
-    const idEmpleado = idVendedorSeleccionado.value;
-    cargarHistorial(idEmpleado);
-});
-
-// Placeholder para el botón de "👁️ Detalles"
-window.verDetallesVenta = function(idVenta) {
-    alert(`Aquí podrías abrir un modal para mostrar qué medicamentos específicos se vendieron en la boleta #${idVenta}.`);
 };
 
-// Arrancar funciones al cargar la página
+// ==========================================
+// CERRAR MODAL
+// ==========================================
+window.cerrarModalDetalle = function() {
+    document.getElementById('modal-detalle').style.display = 'none';
+};
+
+// ==========================================
+// AUTOCOMPLETADO
+// ==========================================
+async function prepararAutocompletado() {
+    empleadosCache = await API.get('/usuarios');
+}
+
+inputVendedor.addEventListener('input', (e) => {
+    const texto = e.target.value.toLowerCase();
+    listaEmpleados.innerHTML = '';
+
+    if (!texto) return;
+
+    const filtrados = empleadosCache.filter(emp =>
+        emp.nombre.toLowerCase().includes(texto)
+    );
+
+    filtrados.forEach(emp => {
+        const div = document.createElement('div');
+        div.textContent = emp.nombre;
+
+        div.onclick = () => {
+            inputVendedor.value = emp.nombre;
+            idVendedorSeleccionado.value = emp.id;
+            listaEmpleados.style.display = 'none';
+        };
+
+        listaEmpleados.appendChild(div);
+    });
+
+    listaEmpleados.style.display = 'block';
+});
+
+// ==========================================
+// FILTRAR
+// ==========================================
+btnFiltrar.addEventListener('click', () => {
+    cargarHistorial(idVendedorSeleccionado.value);
+});
+
+// ==========================================
+// INIT
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarHistorial();
     prepararAutocompletado();
