@@ -14,7 +14,6 @@ const ROLES = {
 
 router.get('/perfil/me', auth, async (req, res) => {
     try {
-        // req.usuario.id viene del token decodificado por el middleware auth
         const [usuarios] = await pool.query('SELECT * FROM USUARIOS WHERE id_usuario = ?', [req.usuario.id]);
         
         if (usuarios.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -27,8 +26,12 @@ router.get('/perfil/me', auth, async (req, res) => {
 
 router.put('/perfil/me', auth, async (req, res) => {
     try {
-        const { username, correo, telefono, password_actual, password_nueva } = req.body;
+        const { username, telefono, password_actual, password_nueva } = req.body;
         const id_usuario = req.usuario.id;
+    
+        if (telefono && !/^\d{9}$/.test(telefono)) {
+            return res.status(400).json({ error: 'El teléfono debe tener exactamente 9 dígitos' });
+        }
 
         const [usuarios] = await pool.query('SELECT * FROM USUARIOS WHERE id_usuario = ?', [id_usuario]);
         const usuario = usuarios[0];
@@ -44,18 +47,34 @@ router.put('/perfil/me', auth, async (req, res) => {
         }
 
         await pool.query(
-            'UPDATE USUARIOS SET username = ?, correo = ?, telefono = ?, password_hash = ? WHERE id_usuario = ?',
-            [username, correo, telefono, passFinal, id_usuario]
+            'UPDATE USUARIOS SET username = ?, telefono = ?, password_hash = ? WHERE id_usuario = ?',
+            [username, telefono, passFinal, id_usuario]
         );
 
-        res.json({ mensaje: 'Perfil actualizado correctamente' });
+        const [usuariosUpd] = await pool.query('SELECT * FROM USUARIOS WHERE id_usuario = ?', [id_usuario]);
+        const userUpd = usuariosUpd[0];
+
+        const nuevoToken = jwt.sign(
+            { 
+                id: userUpd.id_usuario, 
+                rol: userUpd.id_rol, 
+                nombre: userUpd.nombre,
+                username: userUpd.username 
+            },
+            SECRET_KEY,
+            { expiresIn: '8h' }
+        );
+
+        res.json({ 
+            mensaje: 'Perfil actualizado correctamente',
+            token: nuevoToken 
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Error en PUT /perfil/me:", error);
         res.status(500).json({ error: 'Error al actualizar el perfil' });
     }
 });
 
-// Registro de usuario con validación de rol y hash de contraseña
 router.post('/registro', async (req, res) => {
     try {
         const { id_rol, nombre, apellidos, telefono, correo, username, password } = req.body;

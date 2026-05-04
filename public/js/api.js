@@ -21,27 +21,27 @@ async function hacerPeticion(endpoint, metodo = 'GET', body = null) {
 
     try {
         const response = await fetch(`${API_URL}${endpoint}`, config);
+
+        if ((response.status === 401 || response.status === 403) && !endpoint.includes('/login')) {
+            // Solo expulsar si no estamos intentando actualizar el perfil
+            if (!endpoint.includes('/perfil/me')) {
+                alert('Tu sesión ha expirado o no tienes permisos.');
+                localStorage.removeItem('token_botica');
+                localStorage.removeItem('usuario_botica');
+                window.location.href = 'index.html';
+                throw new Error('No autorizado');
+            }
+        }
         const data = await response.json();
 
-        if (response.status === 401 || response.status === 403) {
-            alert('Tu sesión ha expirado o no tienes permisos.');
-            localStorage.removeItem('token_botica');
-            localStorage.removeItem('usuario_botica');
-            window.location.href = 'index.html';
-            throw new Error('No autorizado');
-        }
-
-        // Error del backend
         if (!response.ok) {
             throw new Error(data.error || 'Error del servidor');
         }
 
-        // Si viene con envelope → devolver solo data
         if (data.ok !== undefined) {
             return data.data;
         }
 
-        // Compatibilidad (por si alguna ruta no usa envelope)
         return data;
 
     } catch (error) {

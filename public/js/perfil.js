@@ -3,22 +3,25 @@ const msgPerfil = document.getElementById('msg-perfil');
 
 async function cargarDatosPerfil() {
     try {
-        const datos = await API.get('/usuarios/perfil/me');
-        document.getElementById('perfil-nombre').textContent = `${datos.nombre} ${datos.apellidos}`;
-        document.getElementById('perfil-rol').textContent = (datos.rol === 1 || datos.id_rol === 1) ? 'Administrador' : 'Vendedor';
+        const datos = await API.get('/usuarios/perfil/me')
         
-        // Cargar el username en el input para que pueda editarlo
-        document.getElementById('perfil-username-input').value = datos.username;
-        document.getElementById('perfil-correo').value = datos.correo || '';
-        document.getElementById('perfil-telefono').value = datos.telefono || '';
-    } catch (e) { console.error(e); }
+        if (datos) {
+            document.getElementById('perfil-nombre').textContent = `${datos.nombre} ${datos.apellidos}`;
+            document.getElementById('perfil-rol').textContent = (datos.id_rol === 1) ? 'Administrador' : 'Vendedor';
+            document.getElementById('perfil-username-input').value = datos.username || '';
+            document.getElementById('perfil-correo').value = datos.correo || '';
+            document.getElementById('perfil-telefono').value = datos.telefono || '';
+        }
+    } catch (e) { 
+        console.error("Error al cargar perfil:", e); 
+    }
 }
 
 formPerfil.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
     const payload = {
         username: document.getElementById('perfil-username-input').value.trim(),
-        correo: document.getElementById('perfil-correo').value.trim(),
         telefono: document.getElementById('perfil-telefono').value.trim(),
         password_actual: document.getElementById('perfil-pass-actual').value,
         password_nueva: document.getElementById('perfil-pass-nueva').value
@@ -26,15 +29,25 @@ formPerfil.addEventListener('submit', async (e) => {
 
     try {
         const res = await API.put('/usuarios/perfil/me', payload);
+        
+        if (res.token) {
+            localStorage.setItem('token_botica', res.token);
+            const payloadBase64 = res.token.split('.')[1];
+            const decoded = JSON.parse(atob(payloadBase64));
+            localStorage.setItem('usuario_botica', JSON.stringify({
+                id: decoded.id,
+                nombre: decoded.nombre,
+                rol: decoded.rol
+            }));
+
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
         mostrarMensaje(`✅ ${res.mensaje}`, true);
-        
-        document.getElementById('perfil-pass-actual').value = '';
-        document.getElementById('perfil-pass-nueva').value = '';
-        
-        // Recargamos datos para confirmar cambios
-        cargarDatosPerfil(); 
+        await cargarDatosPerfil();
+
     } catch (err) {
-        mostrarMensaje(`❌ ${err.message}`, false); // Aquí saltará el "Usuario ya en uso" si MySQL detecta el duplicado
+        mostrarMensaje(`❌ ${err.message}`, false);
     }
 });
 

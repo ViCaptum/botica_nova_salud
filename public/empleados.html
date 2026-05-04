@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- MODAL DE EDICIÓN ACTUALIZADO -->
     <div id="modal-editar-emp" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px;">
             <h2 style="color: var(--color-primario); margin-bottom: 20px;"><img src="img/empleado.png" alt="det-empleado" class="icons-md"> Detalles del Empleado</h2>
@@ -26,7 +27,11 @@
                 </div>
                 <div>
                     <label>Teléfono:</label>
-                    <input type="text" id="edit-telefono">
+                    <input type="text" id="edit-telefono" 
+                           maxlength="9" 
+                           pattern="\d{9}" 
+                           title="El teléfono debe tener exactamente 9 dígitos"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
                 <div>
                     <label>Rol en el Sistema:</label>
@@ -38,7 +43,7 @@
                 
                 <div class="form-full-width">
                     <p style="font-size: 0.85em; color: var(--texto-secundario); background: var(--bg-input); padding: 10px; border-radius: 6px; border: 1px dashed var(--borde);">
-                        🔒 <strong>Nota:</strong> El correo y la contraseña solo los cambia el empleado en su Perfil.
+                        🔒 <strong>Nota:</strong> El usuario y la contraseña solo los cambia el empleado en su Perfil.
                     </p>
                 </div>
                 
@@ -57,12 +62,11 @@
         </div>
 
         <div class="admin-layout">
-            <!-- COLUMNA IZQ-->
+            <!-- FORMULARIO DE REGISTRO ACTUALIZADO -->
             <section style="padding: 15px; margin: 0; max-height: 90vh; overflow-y: auto;">
                 <h3 style="margin-bottom: 15px; font-size: 1.1em;"><img src="img/nueva-cuenta.png" alt="agregar" class="icons-md"> Alta de Personal</h3>
                 <form id="form-registro">
                     
-                    <!-- Información Personal Agrupada -->
                     <div class="seccion-formulario" style="padding: 12px; margin-bottom: 12px;">
                         <h3 style="font-size: 0.95em; margin-bottom: 10px;">👤 Info. Personal</h3>
                         <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;"> 
@@ -72,7 +76,12 @@
                                 <input type="email" id="reg-correo" placeholder="Correo Electrónico" required style="padding: 8px;">
                             </div>
                             <div style="grid-column: 1 / -1;">
-                                <input type="text" id="reg-telefono" placeholder="Teléfono (Opcional)" style="padding: 8px;">
+                                <input type="text" id="reg-telefono" placeholder="Teléfono (9 dígitos)" 
+                                       maxlength="9" 
+                                       pattern="\d{9}" 
+                                       title="El teléfono debe tener exactamente 9 dígitos"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                       style="padding: 8px;">
                             </div>
                         </div>
                     </div>
@@ -88,7 +97,6 @@
                         </div>
                     </div>
                     
-                    <!-- Contenedores de mensajes -->
                     <div id="msg-error-registro" style="color: var(--error); display: none; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
                     <div id="msg-exito-registro" style="color: var(--exito); display: none; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--color-primario); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
                     
@@ -96,7 +104,7 @@
                 </form>
             </section>
 
-            <!-- COLUMNA DER -->
+            <!-- COLUMNA DER (Sin cambios requeridos aquí) -->
             <section style="padding: 25px; margin: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                     <h3 style="margin: 0; color: var(--color-primario);"><img src="img/directorio-telefonico.png" alt="directorio" class="icons-md"> Directorio</h3>
@@ -111,11 +119,10 @@
                                 <th>Rol</th>
                                 <th>Contacto</th>
                                 <th>Usuario</th>
-                                <th style="text-align: center;">Acciones</th> <!-- NUEVA COLUMNA -->
+                                <th style="text-align: center;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-empleados-body">
-                            <!-- JS inyecta la lista aquí -->
                         </tbody>
                     </table>
                 </div>
