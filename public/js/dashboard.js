@@ -1,90 +1,129 @@
-const tbodyCatalogo = document.getElementById('tabla-catalogo-body');
-const btnBuscar = document.getElementById('btn-buscar-catalogo');
-const inputBuscar = document.getElementById('input-buscar-catalogo');
+document.addEventListener('DOMContentLoaded', cargarEstadisticasDashboard);
 
-// Bandera para que la voz no suene 100 veces si recarga mucho
-let alertaEmitida = false;
-
-async function cargarCatalogo() {
-    const termino = inputBuscar.value.trim();
-    let endpoint = '/inventario';
-    
-    // Si hay búsqueda, añadimos la query string[cite: 26]
-    if (termino) {
-        endpoint += `?buscar=${encodeURIComponent(termino)}`;
-    }
-
+async function cargarEstadisticasDashboard() {
     try {
-        const productos = await API.get(endpoint);
-        renderizarCatalogo(productos);
-        verificarStockCritico(productos);
+        const data = await API.get('/dashboard/stats');
+        
+        const totalProductos = data.kpis.productos || 0;
+        const totalVentas = data.kpis.ventas || 0;
+        const totalUsuarios = data.kpis.usuarios || 0;
+
+        document.getElementById('kpi-productos').textContent = totalProductos;
+        document.getElementById('kpi-ventas').textContent = `S/ ${parseFloat(totalVentas).toFixed(2)}`;
+        document.getElementById('kpi-usuarios').textContent = totalUsuarios;
+
+        renderizarAlertasStock(data.alertas || []);
+
+        if (data.graficos.productos && data.graficos.productos.length > 0) {
+            renderizarGraficoProductos(data.graficos.productos);
+        } else {
+            mostrarMensajeVacio('chart-productos', 'No hay datos de productos vendidos aún.');
+        }
+
+        if (data.graficos.vendedores && data.graficos.vendedores.length > 0) {
+            renderizarGraficoVendedores(data.graficos.vendedores);
+        } else {
+            mostrarMensajeVacio('chart-vendedores', 'No hay registros de ventas por vendedor.');
+        }
+
     } catch (error) {
-        console.error("Error al cargar el catálogo:", error);
+        console.error("Error al cargar el dashboard:", error);
     }
 }
 
-function renderizarCatalogo(productos) {
-    tbodyCatalogo.innerHTML = ''; 
-    
-    if (productos.length === 0) {
-        tbodyCatalogo.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--texto-secundario);">No se encontraron productos.</td></tr>';
+function renderizarAlertasStock(alertas) {
+    const contenedor = document.getElementById('lista-alertas-dashboard');
+    contenedor.innerHTML = '';
+
+    if (alertas.length === 0) {
+        contenedor.innerHTML = '<p class="text-slate-400 italic text-sm text-center mt-10">Todo el stock está en niveles óptimos.</p>';
         return;
     }
 
-    productos.forEach(prod => {
-        // Lógica visual: Si el stock actual es menor o igual al mínimo (o 5 por defecto)[cite: 26]
-        const stockCritico = prod.stock_actual <= (prod.stock_minimo || 5);
-        
-        const tr = document.createElement('tr');
-        
-        // Pintamos la fila con un fondo rojo muy sutil si está en crítico
-        if (stockCritico) {
-            tr.style.backgroundColor = 'rgba(239, 68, 68, 0.05)'; 
-        }
-
-        // Dividimos la información en 5 columnas ahora
-        tr.innerHTML = `
-            <td style="color: var(--texto-secundario); font-family: monospace; letter-spacing: 1px;">
-                ${prod.codigo_barras || 'N/A'}
-            </td>
-            <td style="font-weight: 500;">
-                ${prod.nombre_producto}
-            </td>
-            <td>
-                ${prod.es_generico ? 'Genérico' : 'De Marca'}
-            </td>
-            <td style="font-weight: 600; color: var(--color-primario);">
-                S/ ${parseFloat(prod.precio_venta).toFixed(2)}
-            </td>
-            <td style="color: ${stockCritico ? 'var(--error)' : 'var(--exito)'}; font-weight: bold;">
-                ${prod.stock_actual} ${stockCritico ? '⚠️' : ''}
-            </td>
+    alertas.forEach(alerta => {
+        const div = document.createElement('div');
+        div.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl flex justify-between items-center';
+        div.innerHTML = `
+            <div>
+                <p class="text-xs font-bold text-slate-700 line-clamp-1">${alerta.nombre_producto}</p>
+                <p class="text-[10px] text-slate-400 font-medium">Mínimo: ${alerta.stock_minimo}</p>
+            </div>
+            <div class="bg-red-100 text-red-600 font-black px-3 py-1 rounded-lg text-sm">
+                ${alerta.stock_actual}
+            </div>
         `;
-        tbodyCatalogo.appendChild(tr);
+        contenedor.appendChild(div);
     });
 }
 
-// Para evitar mostrar múltiples alertas del mismo producto si el usuario recarga varias veces
-let alertasMostradas = new Set();
-// Verifica si algún producto está en stock crítico y muestra una alerta
-function verificarStockCritico(productos) {
-    const productosEnPeligro = productos.filter(
-        p => p.stock_actual <= (p.stock_minimo || 5)
-    );
+function renderizarGraficoProductos(datos) {
+    const ctx = document.getElementById('chart-productos').getContext('2d');
+    
+    const labels = datos.map(d => d.nombre_producto);
+    const valores = datos.map(d => d.total_vendido);
 
-    productosEnPeligro.forEach(p => {
-        if (!alertasMostradas.has(p.id_producto)) {
-            mostrarToast(`⚠️ ${p.nombre_producto} con stock bajo (${p.stock_actual})`);
-            alertasMostradas.add(p.id_producto);
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Unidades Vendidas',
+                data: valores,
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+            }
         }
     });
 }
 
-// Eventos[cite: 26]
-btnBuscar.addEventListener('click', cargarCatalogo);
-inputBuscar.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') cargarCatalogo();
-});
+function renderizarGraficoVendedores(datos) {
+    const ctx = document.getElementById('chart-vendedores').getContext('2d');
+    
+    const labels = datos.map(d => d.nombre);
+    const valores = datos.map(d => d.total_recaudado);
 
-// Cargar automáticamente al abrir el dashboard[cite: 26]
-document.addEventListener('DOMContentLoaded', cargarCatalogo);
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ingresos Generados (S/)',
+                data: valores,
+                backgroundColor: 'rgba(59, 130, 246, 0.8)', // Azul
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+// Función auxiliar para mostrar un mensaje si no hay datos para el gráfico
+function mostrarMensajeVacio(canvasId, mensaje) {
+    const canvas = document.getElementById(canvasId);
+    const contenedor = canvas.parentElement;
+    canvas.style.display = 'none'; // Ocultamos el canvas
+    
+    const p = document.createElement('p');
+    p.className = 'text-slate-400 italic text-sm text-center mt-10';
+    p.textContent = mensaje;
+    contenedor.appendChild(p);
+}

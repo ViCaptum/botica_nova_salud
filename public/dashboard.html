@@ -2,46 +2,79 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Inicio - Botica Nova Salud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Botica Nova Salud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Librería Chart.js para los gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-slate-50 p-6">
-    <main class="max-w-6xl mx-auto">
-        <section class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-            <h2 class="text-2xl font-bold text-slate-800 mb-1">Catálogo y Disponibilidad</h2>
-            <p class="text-slate-500 mb-6">Consulta rápida de precios y stock disponible.</p>
+<body class="bg-slate-50 min-h-screen">
+
+    <main class="transition-all duration-300 lg:ml-[72px] p-4 md:p-8">
+        <header class="mb-8">
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Panel de Control</h2>
+            <p class="text-slate-500 font-medium">Resumen general de operaciones y rendimiento.</p>
+        </header>
+
+        <!-- Tarjetas de KPIs -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+                <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">📦</div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Productos</p>
+                    <h3 id="kpi-productos" class="text-2xl font-black text-slate-800">0</h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+                <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">💰</div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ventas Totales</p>
+                    <h3 id="kpi-ventas" class="text-2xl font-black text-slate-800">S/ 0.00</h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+                <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-inner">👥</div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Usuarios</p>
+                    <h3 id="kpi-usuarios" class="text-2xl font-black text-slate-800">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila Principal: Gráfico de Productos + Alertas -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             
-            <div class="flex gap-3 mb-8">
-                <input type="text" id="input-buscar-catalogo" 
-                    placeholder="Buscar medicamento por nombre o código..." 
-                    class="flex-grow px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                <button id="btn-buscar-catalogo" 
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium">
-                    <img src="img/buscar.png" alt="buscar" class="w-4 h-4 brightness-0 invert"> Buscar
-                </button>
+            <!-- Gráfico de Productos -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Top 5 Productos Más Vendidos</h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="chart-productos"></canvas>
+                </div>
             </div>
 
-            <div class="overflow-x-auto rounded-xl border border-slate-200">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-50 border-bottom border-slate-200">
-                        <tr>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Código</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Nombre del Producto</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Tipo</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Precio (S/)</th>
-                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Stock</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-catalogo-body" class="divide-y divide-slate-100">
-                        <!-- JS inyecta filas aquí -->
-                    </tbody>
-                </table>
+            <!-- Panel de Alertas de Stock -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2 flex items-center gap-2">
+                    <span class="text-red-500 text-lg">⚠️</span> Stock Crítico
+                </h3>
+                <div id="lista-alertas-dashboard" class="flex-grow overflow-y-auto space-y-3 custom-scrollbar pr-2">
+                    <!-- JS inyecta las alertas aquí -->
+                </div>
             </div>
-        </section>
+        </div>
+
+        <!-- Fila Inferior: Gráfico de Vendedores -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Rendimiento por Vendedor</h3>
+            <div class="relative h-72 w-full">
+                <canvas id="chart-vendedores"></canvas>
+            </div>
+        </div>
+
     </main>
 
     <script src="js/auth.js"></script>

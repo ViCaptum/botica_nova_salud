@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());//para que la se use json y no de errores
 app.use(express.static('public'));//para las futuras views
+app.use('/api/dashboard', require('./routes/dashboard'));
 
 //Para rutear las apis de cada módulo
 const inventarioRoutes = require('./routes/inventario');
