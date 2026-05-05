@@ -1,202 +1,202 @@
-// Variables globales para la "caché" en memoria
-let inventarioGlobal = []; // Caché de productos
-let carrito = [];          // Items que el cliente quiere comprar
-let totalVenta = 0.00;     // Dinero total
+let inventarioGlobal = []; 
+let carrito = [];          
+let totalVenta = 0.00;     
 
-//Referencias a elementos del DOM
 const gridProductos = document.getElementById('grid-productos-venta');
 const inputBuscarProd = document.getElementById('input-buscar-prod-venta');
 const contenedorCarrito = document.getElementById('contenedor-items-carrito');
 const lblTotalVenta = document.getElementById('lbl-total-venta');
 const btnProcesarVenta = document.getElementById('btn-procesar-venta');
 
-// Referencias Cliente
 const btnBuscarCliente = document.getElementById('btn-buscar-cliente');
 const inputDni = document.getElementById('input-dni');
 const lblNombreCliente = document.getElementById('lbl-nombre-cliente');
 const hiddenClienteId = document.getElementById('cliente-id-seleccionado');
-const seccionNuevoCliente = document.getElementById('seccion-nuevo-cliente');
+const btnQuitarCliente = document.getElementById('btn-quitar-cliente');
+const modalCliente = document.getElementById('modal-nuevo-cliente');
+const formCliente = document.getElementById('form-nuevo-cliente');
 
-// Botón para buscar cliente por DNI
+const modalConfirmar = document.getElementById('modal-confirmar-venta');
+const montoConfirmar = document.getElementById('monto-confirmar');
+const btnConfirmarFinal = document.getElementById('btn-confirmar-final');
+
+function mostrarNotificacion(mensaje) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = "bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300 pointer-events-auto border border-slate-700";
+    toast.innerHTML = `
+        <div class="w-8 h-8 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center font-bold italic">!</div>
+        <div class="text-sm font-medium">${mensaje}</div>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('animate-out', 'fade-out', 'slide-out-to-right');
+        setTimeout(() => toast.remove(), 500);
+    }, 5000);
+}
+
 btnBuscarCliente.addEventListener('click', async () => {
     const dni = inputDni.value.trim();
-    if (dni.length === 0) return;
-
+    if (dni.length < 8) return alert("Ingrese un DNI de 8 dígitos.");
     try {
-        // Llama a tu API de buscar cliente (GET /api/clientes/buscar/:dni)
         const cliente = await API.get(`/clientes/buscar/${dni}`);
-        
         lblNombreCliente.textContent = `${cliente.nombres} ${cliente.apellidos}`;
-        lblNombreCliente.style.color = "var(--color-primario)";
         hiddenClienteId.value = cliente.id_cliente; 
-        seccionNuevoCliente.style.display = 'none'; 
-        
+        btnQuitarCliente.classList.replace('hidden', 'flex');
     } catch (error) {
-        // Si hay error 404, mostramos el mini-formulario
-        lblNombreCliente.textContent = "DNI no registrado";
-        lblNombreCliente.style.color = "var(--texto-secundario)";
-        hiddenClienteId.value = "";
-        seccionNuevoCliente.style.display = 'block';
+        abrirModalCliente(dni);
     }
 });
 
-// Botón para cancelar el registro rápido
-document.getElementById('btn-cancelar-cliente').addEventListener('click', () => {
-    seccionNuevoCliente.style.display = 'none';
-    inputDni.value = '';
-    lblNombreCliente.textContent = "Público General";
-    lblNombreCliente.style.color = "var(--color-primario)";
-});
-
-// Botón para guardar el nuevo cliente
-document.getElementById('btn-guardar-cliente-rapido').addEventListener('click', async () => {
-    const dni = inputDni.value.trim();
+formCliente.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const dni = document.getElementById('nuevo-cli-dni').value;
     const nombres = document.getElementById('nuevo-cli-nombres').value.trim();
     const apellidos = document.getElementById('nuevo-cli-apellidos').value.trim();
-
-    if (!nombres || !apellidos) {
-        alert("Nombres y apellidos son obligatorios.");
-        return;
-    }
-
+    const correo = document.getElementById('nuevo-cli-correo').value.trim();
     try {
-        const nuevoCliente = { dni, nombres, apellidos, telefono: null, correo: null };
-        const response = await API.post('/clientes', nuevoCliente);
-
-        alert("¡Cliente registrado exitosamente!");
+        const payload = { dni, nombres, apellidos, correo, telefono: null };
+        const response = await API.post('/clientes', payload);
         lblNombreCliente.textContent = `${nombres} ${apellidos}`;
-        lblNombreCliente.style.color = "var(--color-primario)";
         hiddenClienteId.value = response.id_cliente; 
-        seccionNuevoCliente.style.display = 'none'; 
-
+        btnQuitarCliente.classList.replace('hidden', 'flex');
+        cerrarModalCliente();
     } catch (error) {
-        alert(`No se pudo registrar: ${error.message}`);
+        alert(`Error: ${error.message}`);
     }
 });
 
-// Carga el catálogo de productos al iniciar la página
+function abrirModalCliente(dni) {
+    document.getElementById('nuevo-cli-dni').value = dni;
+    modalCliente.classList.replace('hidden', 'flex');
+}
+
+window.cerrarModalCliente = function() {
+    modalCliente.classList.replace('flex', 'hidden');
+    formCliente.reset();
+};
+
+function resetearCliente() {
+    inputDni.value = '';
+    lblNombreCliente.textContent = "Público General";
+    hiddenClienteId.value = '';
+    btnQuitarCliente.classList.replace('flex', 'hidden');
+}
+
+btnQuitarCliente.addEventListener('click', resetearCliente);
+
 async function cargarCatalogoParaVenta() {
     try {
         inventarioGlobal = await API.get('/inventario');
         renderizarGridProductos(inventarioGlobal);
-    } catch (error) {
-        console.error("Error al cargar inventario", error);
-    }
+    } catch (error) { console.error(error); }
 }
 
-// Función para renderizar los productos en la grilla
 function renderizarGridProductos(productos) {
     gridProductos.innerHTML = '';
-    
     productos.forEach(prod => {
         const div = document.createElement('div');
-        div.className = 'product-card';
-        
+        div.className = 'w-full bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group flex flex-col justify-between';
         const sinStock = prod.stock_actual <= 0;
-        
         div.innerHTML = `
             <div>
-                <h4>${prod.nombre_producto}</h4>
-                <p style="font-size: 0.8em; color: var(--texto-secundario);">${prod.codigo_barras || 'N/A'}</p>
+                <div class="mb-3">
+                    <h4 class="font-bold text-slate-800 text-base leading-tight line-clamp-2">${prod.nombre_producto}</h4>
+                    <p class="text-xs font-mono text-slate-400 uppercase tracking-tighter mt-1">${prod.codigo_barras || 'Sin Código'}</p>
+                </div>
+                <div class="flex items-end justify-between gap-2 mt-4">
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Precio</p>
+                        <p class="font-black text-emerald-600 text-xl leading-none">S/ ${parseFloat(prod.precio_venta).toFixed(2)}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[11px] uppercase font-bold ${sinStock ? 'text-red-400' : 'text-slate-400'} mb-1">Stock</p>
+                        <p class="text-base font-bold leading-none ${sinStock ? 'text-red-500' : 'text-slate-600'}">${prod.stock_actual}</p>
+                    </div>
+                </div>
             </div>
-            <div class="price">S/ ${parseFloat(prod.precio_venta).toFixed(2)}</div>
-            <div class="stock" style="color: ${sinStock ? 'var(--error)' : 'var(--texto-secundario)'}">
-                Stock: ${prod.stock_actual}
-            </div>
-            <button onclick="agregarAlCarrito(${prod.id_producto})" ${sinStock ? 'disabled' : ''} style="width: 100%; padding: 8px;">
-                ${sinStock ? 'Agotado' : '<img src="img/anadir-a-la-cesta.png" alt="buscar" class="btn-icon"> Agregar'}
+            <button onclick="agregarAlCarrito(${prod.id_producto})" ${sinStock ? 'disabled' : ''} 
+                class="w-full mt-4 py-2.5 rounded-lg font-bold text-sm uppercase tracking-wide transition-all flex items-center justify-center gap-1.5 
+                ${sinStock ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 text-white shadow-md shadow-emerald-200 hover:bg-emerald-600 hover:-translate-y-0.5 active:translate-y-0'}">
+                ${sinStock ? 'Agotado' : '+ Agregar'}
             </button>
         `;
         gridProductos.appendChild(div);
     });
 }
 
-// Filtro instantáneo al escribir
 inputBuscarProd.addEventListener('input', (e) => {
     const texto = e.target.value.toLowerCase().trim();
     const filtrados = inventarioGlobal.filter(p => 
-        p.nombre_producto.toLowerCase().includes(texto) || 
-        (p.codigo_barras && p.codigo_barras.includes(texto))
+        p.nombre_producto.toLowerCase().includes(texto) || (p.codigo_barras && p.codigo_barras.includes(texto))
     );
     renderizarGridProductos(filtrados);
 });
 
-// Logica para agregar al carrito (memoria) y luego renderizar el carrito en la UI
 window.agregarAlCarrito = function(idProducto) {
-    const productoDB = inventarioGlobal.find(p => p.id_producto === idProducto);
-    const itemExistente = carrito.find(item => item.id_producto === idProducto);
-    
-    if (itemExistente) {
-        if (itemExistente.cantidad < productoDB.stock_actual) {
-            itemExistente.cantidad++;
-            itemExistente.subtotal = itemExistente.cantidad * itemExistente.precio_unitario;
-        } else {
-            alert("No hay suficiente stock de este producto.");
-        }
+    const prodDB = inventarioGlobal.find(p => p.id_producto === idProducto);
+    const item = carrito.find(i => i.id_producto === idProducto);
+    if (item) {
+        if (item.cantidad < prodDB.stock_actual) {
+            item.cantidad++;
+            item.subtotal = item.cantidad * item.precio_unitario;
+        } else mostrarNotificacion("Stock insuficiente");
     } else {
         carrito.push({
-            id_producto: productoDB.id_producto,
-            nombre: productoDB.nombre_producto,
-            precio_unitario: parseFloat(productoDB.precio_venta),
+            id_producto: prodDB.id_producto,
+            nombre: prodDB.nombre_producto,
+            precio_unitario: parseFloat(prodDB.precio_venta),
             cantidad: 1,
-            subtotal: parseFloat(productoDB.precio_venta)
+            subtotal: parseFloat(prodDB.precio_venta)
         });
     }
     renderizarCarritoUI();
 };
 
-// Función para renderizar el carrito en la UI
 function renderizarCarritoUI() {
     contenedorCarrito.innerHTML = '';
     totalVenta = 0;
-
     if (carrito.length === 0) {
-        contenedorCarrito.innerHTML = '<div class="cart-empty-msg">El carrito está vacío</div>';
+        contenedorCarrito.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-20 italic text-sm text-slate-400">El carrito está vacío</div>`;
         btnProcesarVenta.disabled = true;
         lblTotalVenta.textContent = '0.00';
         return;
     }
-
     carrito.forEach((item, index) => {
         totalVenta += item.subtotal;
-
         const div = document.createElement('div');
-        div.className = 'cart-item';
+        div.className = 'bg-slate-50/50 p-4 rounded-2xl border border-slate-100 animate-in slide-in-from-right-4 duration-200';
         div.innerHTML = `
-            <div class="cart-item-header">
-                <span>${item.nombre}</span>
-                <span>S/ ${item.subtotal.toFixed(2)}</span>
+            <div class="flex justify-between items-start mb-3">
+                <span class="text-xs font-bold text-slate-700 line-clamp-1 flex-grow pr-2">${item.nombre}</span>
+                <button onclick="quitarDelCarrito(${index})" class="text-slate-300 hover:text-red-500 transition-colors text-lg font-bold">&times;</button>
             </div>
-            <div class="cart-item-controls">
-                <div>
-                    <span style="color: var(--texto-secundario); margin-right: 5px;">S/ ${item.precio_unitario.toFixed(2)} x </span>
-                    <button onclick="cambiarCantidad(${index}, -1)" style="padding: 2px 8px; cursor: pointer;">-</button>
-                    <span style="margin: 0 10px; font-weight: bold;">${item.cantidad}</span>
-                    <button onclick="cambiarCantidad(${index}, 1)" style="padding: 2px 8px; cursor: pointer;">+</button>
+            <div class="flex justify-between items-center">
+                <div class="flex items-center bg-white rounded-xl p-1 border border-slate-200 shadow-sm">
+                    <button onclick="cambiarCantidad(${index}, -1)" class="w-7 h-7 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors font-bold">-</button>
+                    <span class="w-8 text-center font-bold text-xs text-slate-700">${item.cantidad}</span>
+                    <button onclick="cambiarCantidad(${index}, 1)" class="w-7 h-7 flex items-center justify-center hover:bg-slate-50 text-slate-400 rounded-lg transition-colors font-bold">+</button>
                 </div>
-                <button class="btn-quitar" onclick="quitarDelCarrito(${index})"><img src="img/papelera-de-reciclaje.png" alt="buscar" class="btn-icon"></button>
+                <div class="text-right">
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter text-center">Subtotal</p>
+                    <span class="font-black text-emerald-600 text-sm italic">S/ ${item.subtotal.toFixed(2)}</span>
+                </div>
             </div>
         `;
         contenedorCarrito.appendChild(div);
     });
-
     lblTotalVenta.textContent = totalVenta.toFixed(2);
     btnProcesarVenta.disabled = false;
 }
 
-// Funciones para cambiar cantidad y quitar del carrito
 window.cambiarCantidad = function(index, delta) {
     const item = carrito[index];
-    const productoDB = inventarioGlobal.find(p => p.id_producto === item.id_producto);
-    
+    const prodDB = inventarioGlobal.find(p => p.id_producto === item.id_producto);
     const nuevaCantidad = item.cantidad + delta;
-    
-    if (nuevaCantidad > 0 && nuevaCantidad <= productoDB.stock_actual) {
+    if (nuevaCantidad > 0 && nuevaCantidad <= prodDB.stock_actual) {
         item.cantidad = nuevaCantidad;
         item.subtotal = item.cantidad * item.precio_unitario;
-    } else if (nuevaCantidad > productoDB.stock_actual) {
-        alert("Límite de stock alcanzado.");
-    }
+    } else if (nuevaCantidad > prodDB.stock_actual) mostrarNotificacion("Límite de stock alcanzado");
     renderizarCarritoUI();
 };
 
@@ -205,46 +205,38 @@ window.quitarDelCarrito = function(index) {
     renderizarCarritoUI();
 };
 
-// Procesar la venta: Enviar datos al backend y manejar la respuesta
-btnProcesarVenta.addEventListener('click', async () => {
+btnProcesarVenta.addEventListener('click', () => {
     if (carrito.length === 0) return;
+    montoConfirmar.textContent = `S/ ${totalVenta.toFixed(2)}`;
+    modalConfirmar.classList.replace('hidden', 'flex');
+});
 
-    if (!confirm(`¿Confirmar venta por un total de S/ ${totalVenta.toFixed(2)}?`)) {
-        return;
-    }
+window.cerrarModalConfirmar = function() {
+    modalConfirmar.classList.replace('flex', 'hidden');
+};
 
-    // Armamos el payload EXACTO que espera tu backend (POST /api/ventas)[cite: 33]
-    const payloadVenta = {
+btnConfirmarFinal.addEventListener('click', async () => {
+    cerrarModalConfirmar();
+    const payload = {
         id_cliente: hiddenClienteId.value || null, 
         total_venta: totalVenta,
-        detalles: carrito.map(item => ({
-            id_producto: item.id_producto,
-            cantidad: item.cantidad,
-            precio_unitario: item.precio_unitario,
-            subtotal: item.subtotal
+        detalles: carrito.map(i => ({
+            id_producto: i.id_producto,
+            cantidad: i.cantidad,
+            precio_unitario: i.precio_unitario,
+            subtotal: i.subtotal
         }))
     };
-
     try {
-        const resultado = await API.post('/ventas', payloadVenta);
-        
-        alert(`Venta procesada exitosamente.\nID de Transacción: #${resultado.id_venta}`);
-        
-        // Vaciamos la memoria para el siguiente cliente
+        const res = await API.post('/ventas', payload);
+        mostrarNotificacion(`Venta #${res.id_venta} procesada con éxito.`);
         carrito = [];
-        inputDni.value = '';
-        lblNombreCliente.textContent = "Público General";
-        lblNombreCliente.style.color = "var(--color-primario)";
-        hiddenClienteId.value = '';
-        
-        // Recargamos inventario para actualizar stock visualmente
+        resetearCliente(); 
         await cargarCatalogoParaVenta(); 
         renderizarCarritoUI();
-
-    } catch (error) {
-        alert(`Error al procesar la venta: ${error.message}`);
+    } catch (error) { 
+        mostrarNotificacion(`Error: ${error.message}`);
     }
 });
 
-// Iniciamos la carga del catálogo al abrir la página
 document.addEventListener('DOMContentLoaded', cargarCatalogoParaVenta);

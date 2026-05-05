@@ -2,127 +2,136 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Empleados - Botica Nova Salud</title>
-    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
-    <!-- MODAL DE EDICIÓN ACTUALIZADO -->
-    <div id="modal-editar-emp" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2 style="color: var(--color-primario); margin-bottom: 20px;"><img src="img/empleado.png" alt="det-empleado" class="icons-md"> Detalles del Empleado</h2>
+<body class="bg-slate-50 min-h-screen">
+
+    <div id="modal-editar-emp" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-emerald-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-emerald-600 flex items-center gap-3">
+                    <img src="img/empleado.png" alt="det-empleado" class="w-6 h-6"> Detalles del Empleado
+                </h2>
+                <button onclick="cerrarModalEdicion()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+            </div>
             
-            <form id="form-editar-emp" class="form-grid">
+            <form id="form-editar-emp" class="p-6 space-y-4">
                 <input type="hidden" id="edit-id">
-                
-                <div>
-                    <label>Nombres:</label>
-                    <input type="text" id="edit-nombre" required>
-                </div>
-                <div>
-                    <label>Apellidos:</label>
-                    <input type="text" id="edit-apellidos" required>
-                </div>
-                <div>
-                    <label>Teléfono:</label>
-                    <input type="text" id="edit-telefono" 
-                           maxlength="9" 
-                           pattern="\d{9}" 
-                           title="El teléfono debe tener exactamente 9 dígitos"
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                </div>
-                <div>
-                    <label>Rol en el Sistema:</label>
-                    <select id="edit-rol">
-                        <option value="2">Vendedor</option>
-                        <option value="1">Administrador</option>
-                    </select>
-                </div>
-                
-                <div class="form-full-width">
-                    <p style="font-size: 0.85em; color: var(--texto-secundario); background: var(--bg-input); padding: 10px; border-radius: 6px; border: 1px dashed var(--borde);">
-                        🔒 <strong>Nota:</strong> El usuario y la contraseña solo los cambia el empleado en su Perfil.
-                    </p>
-                </div>
-                
-                <div class="form-full-width" style="display: flex; gap: 15px; margin-top: 15px;">
-                    <button type="submit" style="flex-grow: 1;"><img src="img/salvado.png" alt="guardar" class="btn-icon"> Guardar Cambios</button>
-                    <button type="button" onclick="document.getElementById('modal-editar-emp').style.display='none'" style="background-color: transparent; border: 1px solid var(--borde); color: var(--texto-principal);">Cancelar</button>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Guardar Cambios</button>
+                    <button type="button" onclick="cerrarModalEdicion()" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <main>
-        <div style="margin-bottom: 25px;">
-            <h2 style="font-size: 2.2em; margin-bottom: 5px;">Gestión de Personal</h2>
-            <p style="color: var(--texto-secundario);">Registra nuevos colaboradores y administra el directorio del equipo.</p>
+    <div id="modal-confirmar-eliminar" class="fixed inset-0 z-[110] hidden items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center animate-in fade-in zoom-in duration-200">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🗑️</div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2 italic">¿Despedir Empleado?</h3>
+            <p id="texto-eliminar" class="text-slate-500 text-sm mb-6">¿Estás seguro de eliminar a <span id="nombre-emp-eliminar" class="font-bold text-slate-700"></span> del sistema?</p>
+            <div class="flex gap-3">
+                <button id="btn-confirmar-delete" class="flex-grow bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition-all">Sí, Eliminar</button>
+                <button onclick="cerrarModalEliminar()" class="flex-grow bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 rounded-lg">No, Cancelar</button>
+            </div>
         </div>
+    </div>
 
-        <div class="admin-layout">
-            <!-- FORMULARIO DE REGISTRO ACTUALIZADO -->
-            <section style="padding: 15px; margin: 0; max-height: 90vh; overflow-y: auto;">
-                <h3 style="margin-bottom: 15px; font-size: 1.1em;"><img src="img/nueva-cuenta.png" alt="agregar" class="icons-md"> Alta de Personal</h3>
-                <form id="form-registro">
-                    
-                    <div class="seccion-formulario" style="padding: 12px; margin-bottom: 12px;">
-                        <h3 style="font-size: 0.95em; margin-bottom: 10px;">👤 Info. Personal</h3>
-                        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;"> 
-                            <input type="text" id="reg-nombre" placeholder="Nombres" required style="padding: 8px;">
-                            <input type="text" id="reg-apellidos" placeholder="Apellidos" required style="padding: 8px;">
-                            <div style="grid-column: 1 / -1;">
-                                <input type="email" id="reg-correo" placeholder="Correo Electrónico" required style="padding: 8px;">
-                            </div>
-                            <div style="grid-column: 1 / -1;">
-                                <input type="text" id="reg-telefono" placeholder="Teléfono (9 dígitos)" 
-                                       maxlength="9" 
-                                       pattern="\d{9}" 
-                                       title="El teléfono debe tener exactamente 9 dígitos"
-                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                                       style="padding: 8px;">
-                            </div>
+    <div id="modal-validar-admin" class="fixed inset-0 z-[120] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 animate-in fade-in zoom-in duration-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <span class="text-emerald-500">🛡️</span> Confirmación de Seguridad
+            </h3>
+            <p class="text-slate-500 text-xs mb-4 uppercase font-black">Para crear otro Administrador, ingresa TU contraseña actual:</p>
+            <input type="password" id="confirm-pass-admin" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none mb-4" placeholder="Tu contraseña">
+            <div id="msg-error-admin-confirm" class="hidden text-red-500 text-[10px] mb-3 font-bold italic"></div>
+            <div class="flex gap-2">
+                <button id="btn-validar-y-registrar" class="flex-grow bg-emerald-600 text-white font-bold py-2 rounded-lg">Confirmar Registro</button>
+                <button onclick="cerrarModalAdmin()" class="px-4 py-2 text-slate-500 font-medium">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="transition-all duration-300 lg:ml-[72px] p-4 md:p-8">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Gestión de Personal</h2>
+            <p class="text-slate-500">Registra nuevos colaboradores y administra el directorio del equipo.</p>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            
+            <section class="xl:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-8">
+                <h3 class="text-lg font-bold text-emerald-600 mb-6 flex items-center gap-2 border-b border-slate-50 pb-4">
+                    <img src="img/nueva-cuenta.png" alt="agregar" class="w-6 h-6"> Alta de Personal
+                </h3>
+                
+                <form id="form-registro" class="space-y-6">
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Info. Personal
+                        </p>
+                        <div class="grid grid-cols-2 gap-3"> 
+                            <input type="text" id="reg-nombre" placeholder="Nombres" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input type="text" id="reg-apellidos" placeholder="Apellidos" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
+                        <input type="email" id="reg-correo" placeholder="Correo Electrónico" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <input type="text" id="reg-telefono" placeholder="Teléfono (9 dígitos)" maxlength="9" pattern="\d{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                     </div>
 
-                    <div class="seccion-formulario" style="padding: 12px; margin-bottom: 12px;">
-                        <h3 style="font-size: 0.95em; margin-bottom: 10px;">🔐 Acceso</h3>
-                        <select id="reg-rol" style="padding: 8px; margin-bottom: 8px; cursor: pointer;">
+                    <div class="space-y-4 pt-2">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Acceso
+                        </p>
+                        <select id="reg-rol" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm cursor-pointer outline-none focus:border-emerald-500">
                             <option value="2" selected>Vendedor (Caja e Inv.)</option>
                             <option value="1">Administrador (Total)</option>
                         </select>
-                        <div style="background-color: var(--bg-input); padding: 8px; border-radius: 6px; border: 1px dashed var(--color-primario); text-align: center;">
-                            <p style="color: var(--texto-secundario); font-size: 0.75em; margin: 0;">Credenciales automáticas 🤖</p>
+                        <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100 text-center">
+                            <p class="text-emerald-700 text-[11px] font-medium">Credenciales generadas automáticamente 🤖</p>
                         </div>
                     </div>
                     
-                    <div id="msg-error-registro" style="color: var(--error); display: none; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
-                    <div id="msg-exito-registro" style="color: var(--exito); display: none; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--color-primario); border-radius: 6px; margin-bottom: 8px; font-size: 0.85em;"></div>
+                    <div id="msg-error-registro" class="hidden p-3 bg-red-50 text-red-600 text-xs rounded-lg border border-red-100 font-medium"></div>
+                    <div id="msg-exito-registro" class="hidden p-4 bg-emerald-50 text-emerald-700 text-xs rounded-lg border border-emerald-200 font-medium leading-relaxed"></div>
                     
-                    <button type="submit" style="width: 100%; padding: 10px; font-size: 0.95em;">Registrar Empleado</button>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-100 transition-all active:scale-[0.98]">
+                        Registrar Empleado
+                    </button>
                 </form>
             </section>
 
-            <!-- COLUMNA DER (Sin cambios requeridos aquí) -->
-            <section style="padding: 25px; margin: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                    <h3 style="margin: 0; color: var(--color-primario);"><img src="img/directorio-telefonico.png" alt="directorio" class="icons-md"> Directorio</h3>
-                    <input type="text" id="input-buscar-emp" placeholder="Buscar empleado..." style="max-width: 300px;">
+            <section class="xl:col-span-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center gap-3">
+                        <img src="img/directorio-telefonico.png" alt="directorio" class="w-6 h-6"> Directorio
+                    </h3>
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="input-buscar-emp" placeholder="Buscar empleado..." 
+                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                        <span class="absolute left-3 top-2.5 opacity-40">🔍</span>
+                    </div>
                 </div>
                 
-                <div style="max-height: 700px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 8px;">
-                    <table style="margin-top: 0; border: none; min-width: 600px;">
-                        <thead style="position: sticky; top: 0; z-index: 1;">
+                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead class="bg-slate-50/80 sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th>Empleado</th>
-                                <th>Rol</th>
-                                <th>Contacto</th>
-                                <th>Usuario</th>
-                                <th style="text-align: center;">Acciones</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Empleado</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Rol</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Contacto</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Usuario</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tabla-empleados-body">
+                        <tbody id="tabla-empleados-body" class="divide-y divide-slate-100">
+                            <!-- JS inyecta filas aquí -->
                         </tbody>
                     </table>
                 </div>

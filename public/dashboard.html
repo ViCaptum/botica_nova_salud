@@ -3,36 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <title>Inicio - Botica Nova Salud</title>
-    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
-    <main>
-        <section>
-            <h2>Catálogo y Disponibilidad</h2>
-            <p style="color: var(--texto-secundario); margin-bottom: 15px;">Consulta rápida de precios y stock disponible.</p>
+<body class="bg-slate-50 p-6">
+    <main class="max-w-6xl mx-auto">
+        <section class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+            <h2 class="text-2xl font-bold text-slate-800 mb-1">Catálogo y Disponibilidad</h2>
+            <p class="text-slate-500 mb-6">Consulta rápida de precios y stock disponible.</p>
             
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <input type="text" id="input-buscar-catalogo" placeholder="Buscar medicamento por nombre o código..." style="flex-grow: 1;">
-                <button id="btn-buscar-catalogo"><img src="img/buscar.png" alt="buscar" class="btn-icon">Buscar</button>
+            <div class="flex gap-3 mb-8">
+                <input type="text" id="input-buscar-catalogo" 
+                    placeholder="Buscar medicamento por nombre o código..." 
+                    class="flex-grow px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                <button id="btn-buscar-catalogo" 
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium">
+                    <img src="img/buscar.png" alt="buscar" class="w-4 h-4 brightness-0 invert"> Buscar
+                </button>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Nombre del Producto</th>
-                        <th>Tipo</th>
-                        <th>Precio (S/)</th>
-                        <th>Stock</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-catalogo-body">
-                    <!-- Filas del catálogo inyectadas por JS -->
-                </tbody>
-            </table>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-bottom border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Código</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Nombre del Producto</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Tipo</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Precio (S/)</th>
+                            <th class="px-6 py-4 text-sm font-semibold text-slate-700">Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-catalogo-body" class="divide-y divide-slate-100">
+                        <!-- JS inyecta filas aquí -->
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 

@@ -146,7 +146,8 @@ router.post('/login', async (req, res) => {
             {
                 id: usuario.id_usuario,
                 rol: usuario.id_rol,
-                nombre: usuario.nombre
+                nombre: usuario.nombre,
+                username: usuario.username
             },
             SECRET_KEY,
             { expiresIn: '8h' }

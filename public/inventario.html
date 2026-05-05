@@ -2,106 +2,133 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario - Botica Nova Salud</title>
-    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen">
 
-    <main>
-        <section id="alertas-stock" style="margin-bottom: 15px;"></section>
-        <section id="seccion-filtros">
-            <input type="text" id="input-buscar" placeholder="Buscar por nombre o código...">
-            <select id="select-tipo">
-                <option value="todos">Todos los productos</option>
-                <option value="generico">Solo Genéricos</option>
-                <option value="marca">Solo De Marca</option>
-            </select>
-            <button id="btn-buscar" style="display: none;">Buscar</button>
-            <button id="btn-nuevo-producto" style="display: none;">+ Nuevo Producto</button>
+    <main class="transition-all duration-300 lg:ml-[72px] p-4 md:p-8">
+        <section id="alertas-stock" class="max-w-7xl mx-auto mb-6 space-y-2"></section>
+
+        <section class="max-w-7xl mx-auto bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Inventario de Productos</h2>
+                    <p class="text-slate-500">Control de existencias, precios y categorías.</p>
+                </div>
+                <button id="btn-nuevo-producto" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition-all flex items-center gap-2">
+                    <span>+</span> Nuevo Producto
+                </button>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-slate-50/50 p-6 rounded-xl border border-slate-100">
+                <div class="md:col-span-2 relative">
+                    <input type="text" id="input-buscar" placeholder="Buscar por nombre o código..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm">
+                    <span class="absolute left-3 top-2.5 opacity-30 text-lg">🔍</span>
+                </div>
+                <select id="select-tipo" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm cursor-pointer">
+                    <option value="todos">Todos los productos</option>
+                    <option value="generico">Solo Genéricos</option>
+                    <option value="marca">Solo De Marca</option>
+                </select>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Código</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Nombre</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Categoría / Lab</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Tipo</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Precio</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Stock</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-productos-body" class="divide-y divide-slate-100">
+                    </tbody>
+                </table>
+            </div>
         </section>
 
-        <section>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Categoría</th>
-                        <th>Laboratorio</th>
-                        <th>Tipo</th>
-                        <th>Precio (S/)</th>
-                        <th>Stock</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-productos-body">
-                    <!-- JavaScript inyectará las filas aquí -->
-                </tbody>
-            </table>
-        </section>
-
-        <div id="modal-producto" class="modal-overlay" style="display: none;">
-            <div class="modal-content">
-                <h2 id="titulo-formulario" style="margin-bottom: 20px; color: var(--color-primario);">Nuevo Producto</h2>
+        <div id="modal-producto" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-emerald-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <h2 id="titulo-formulario" class="text-xl font-bold text-emerald-600">Nuevo Producto</h2>
+                    <button type="button" id="btn-cerrar-modal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+                </div>
                 
-                <form id="form-producto" class="form-grid">
+                <form id="form-producto" class="p-6 space-y-4">
                     <input type="hidden" id="prod-id">
                     
-                    <div>
-                        <label for="prod-categoria">Categoría:</label>
-                        <select id="prod-categoria" required><option value="">Cargando...</option></select>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Categoría:</label>
+                            <select id="prod-categoria" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Laboratorio:</label>
+                            <select id="prod-laboratorio" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        </div>
                     </div>
-                    <div>
-                        <label for="prod-laboratorio">Laboratorio:</label>
-                        <select id="prod-laboratorio" required><option value="">Cargando...</option></select>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Código de Barras:</label>
+                            <input type="text" id="prod-codigo" maxlength="50" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Nombre del Producto:</label>
+                            <input type="text" id="prod-nombre" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
                     </div>
-                    <div>
-                        <label for="prod-codigo">Código de Barras:</label>
-                        <input type="text" id="prod-codigo">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Tipo:</label>
+                            <select id="prod-generico" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="1">Genérico</option>
+                                <option value="0">De Marca</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Precio (S/):</label>
+                            <input type="number" step="0.01" id="prod-precio" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
                     </div>
-                    <div>
-                        <label for="prod-nombre">Nombre del Producto:</label>
-                        <input type="text" id="prod-nombre" required>
-                    </div>
-                    <div>
-                        <label for="prod-generico">Tipo de Medicamento:</label>
-                        <select id="prod-generico">
-                            <option value="1">Genérico</option>
-                            <option value="0">De Marca</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="prod-precio">Precio de Venta (S/):</label>
-                        <input type="number" step="0.01" id="prod-precio" required>
-                    </div>
-                    <div>
-                        <label for="prod-stock">Stock Actual:</label>
-                        <input type="number" id="prod-stock" required>
-                    </div>
-                    <div>
-                        <label for="prod-minimo">Stock Mínimo (Alerta):</label>
-                        <input type="number" id="prod-minimo" required>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Stock Actual:</label>
+                            <input type="number" id="prod-stock" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Stock Mínimo (Alerta):</label>
+                            <input type="number" id="prod-minimo" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
                     </div>
                     
-                    <!-- Botones de Acción ocupando el ancho completo -->
-                    <div class="form-full-width" style="display: flex; gap: 15px; margin-top: 15px;">
-                        <button type="submit" style="flex-grow: 1;"><img src="img/salvado.png" alt="guardar" class="btn-icon"> Guardar Producto</button>
-                        <button type="button" id="btn-cancelar-producto" style="background-color: transparent; border: 1px solid var(--borde); color: var(--texto-principal);">Cancelar</button>
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-100 transition-all flex items-center justify-center gap-2">
+                            <img src="img/salvado.png" alt="guardar" class="w-4 h-4 brightness-0 invert"> Guardar Producto
+                        </button>
+                        <button type="button" id="btn-cancelar-producto" class="px-8 py-3.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all">
+                            Cancelar
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </main>
 
-    <div id="toast-container" style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-    "></div>
+    <div id="toast-container" class="fixed top-6 right-6 z-[9999] flex flex-col gap-3"></div>
 
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>

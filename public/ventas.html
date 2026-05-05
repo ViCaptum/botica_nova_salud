@@ -2,76 +2,122 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Punto de Venta - Botica Nova Salud</title>
-    <link rel="stylesheet" href="css/style.css">
-    <!-- Enlace a Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen">
 
-    <main class="pos-layout">
-        <div class="pos-main">
+    <main class="transition-all duration-300 lg:ml-[72px] p-4 flex flex-col lg:flex-row gap-6 h-[calc(100vh-2rem)]">
+        
+        <div class="flex-grow flex flex-col gap-6 overflow-hidden">
             
-            <section style="padding: 15px 20px; margin-bottom: 15px;">
-                <div style="display: flex; gap: 15px; align-items: flex-end;">
-                    <div style="flex-grow: 1; margin-bottom: 0;">
-                        <label for="input-dni">DNI del cliente (Opcional):</label>
-                        <input type="text" id="input-dni" placeholder="Ej. 77554433" maxlength="8">
+            <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-grow w-full">
+                        <label for="input-dni" class="block text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">DNI del Cliente (Opcional):</label>
+                        <input type="text" id="input-dni" placeholder="Ej. 77554433" maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
                     </div>
-                    <button id="btn-buscar-cliente" style="white-space: nowrap;"><img src="img/buscar.png" alt="buscar" class="btn-icon"> Buscar</button>
+                    <button id="btn-buscar-cliente" class="w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white px-8 py-2.5 rounded-lg font-bold transition-all flex items-center justify-center gap-2">
+                        <img src="img/buscar.png" alt="buscar" class="w-4 h-4 brightness-0 invert"> Buscar
+                    </button>
                 </div>
 
-                <div id="seccion-nuevo-cliente" style="display: none; background-color: var(--bg-fondo); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px dashed var(--color-primario);">
-                    <h3 style="color: var(--color-secundario); font-size: 1.1em; margin-bottom: 10px;">Registrar Cliente Rápido</h3>
-                    <div class="form-grid">
-                        <input type="text" id="nuevo-cli-nombres" placeholder="Nombres">
-                        <input type="text" id="nuevo-cli-apellidos" placeholder="Apellidos">
-                        <div class="form-full-width" style="display: flex; gap: 10px;">
-                            <button id="btn-guardar-cliente-rapido" style="flex-grow: 1;">Guardar y Seleccionar</button>
-                            <button id="btn-cancelar-cliente" style="background-color: var(--borde); color: var(--texto-principal);">Cancelar</button>
+                <div id="modal-nuevo-cliente" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+                    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-emerald-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-emerald-600 flex items-center gap-2">
+                                <span class="text-xl">👤</span> Registro de Cliente
+                            </h3>
+                            <button type="button" onclick="cerrarModalCliente()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
                         </div>
+                        <form id="form-nuevo-cliente" class="p-6 space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">DNI (Identificador):</label>
+                                <input type="text" id="nuevo-cli-dni" readonly class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 font-bold outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombres:</label>
+                                    <input type="text" id="nuevo-cli-nombres" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Apellidos:</label>
+                                    <input type="text" id="nuevo-cli-apellidos" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Correo Electrónico:</label>
+                                <input type="email" id="nuevo-cli-correo" required placeholder="ejemplo@correo.com" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div class="flex gap-3 pt-4">
+                                <button type="submit" class="flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Registrar y Seleccionar</button>
+                                <button type="button" onclick="cerrarModalCliente()" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50">Cancelar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </section>
 
-            <section style="padding: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="margin: 0;">Catálogo Rápido</h2>
-                    <input type="text" id="input-buscar-prod-venta" placeholder="Buscar por nombre o código..." style="max-width: 300px;">
-                </div>
-                
-                <!-- Aquí JS inyectará las "tarjetas" de los productos -->
-                <div id="grid-productos-venta" class="product-grid">
-                    <!-- Los productos aparecerán aquí -->
-                </div>
+            <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex-grow flex flex-col overflow-hidden">
+                <header class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-800 tracking-tight">Catálogo Rápido</h2>
+                    <div class="relative w-full max-w-xs text-sm">
+                        <input type="text" id="input-buscar-prod-venta" placeholder="Buscar producto..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                </header>
+                <!-- Aquí se modificó la cuadrícula para permitir 4 columnas en pantallas muy grandes -->
+                <div id="grid-productos-venta" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto pr-2 custom-scrollbar"></div>
             </section>
         </div>
 
-        <aside class="pos-cart-panel">
-            <div class="cart-header">
-                <h3>Resumen de Venta</h3>
-                <p class="cliente-badge">
-                    👤 Cliente: <strong id="lbl-nombre-cliente" style="color: var(--color-primario);">Público General</strong>
-                </p>
+        <aside class="w-full lg:w-[400px] flex flex-col bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50/30">
+                <h3 class="text-lg font-bold text-slate-800 tracking-tight mb-4 text-center italic">Resumen de Venta</h3>
+                <div class="bg-emerald-50 border border-emerald-100 px-4 py-3 rounded-2xl flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">👤</span>
+                        <div>
+                            <p class="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest">Cliente Seleccionado</p>
+                            <strong id="lbl-nombre-cliente" class="text-sm font-bold text-emerald-700">Público General</strong>
+                        </div>
+                    </div>
+                    <button id="btn-quitar-cliente" class="hidden items-center justify-center text-emerald-400 hover:text-red-500 transition-colors font-black text-2xl w-8 h-8 rounded-full hover:bg-red-50">&times;</button>
+                </div>
                 <input type="hidden" id="cliente-id-seleccionado" value="">
             </div>
 
-            <div class="cart-body" id="contenedor-items-carrito">
-                <!-- JS inyecta los items del carrito aquí -->
-                <div class="cart-empty-msg">El carrito está vacío</div>
-            </div>
+            <div id="contenedor-items-carrito" class="flex-grow p-6 space-y-4 overflow-y-auto custom-scrollbar"></div>
 
-            <div class="cart-footer">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.2em;">
-                    <span>Total a Pagar:</span>
-                    <strong style="color: var(--color-primario); font-size: 1.4em;">S/ <span id="lbl-total-venta">0.00</span></strong>
+            <div class="p-6 bg-white border-t border-slate-100 shadow-[0_-10px_30px_rgba(0,0,0,0.02)]">
+                <div class="flex justify-between items-end mb-6">
+                    <span class="text-slate-400 font-semibold text-sm uppercase tracking-wider">Total a Pagar</span>
+                    <div class="text-right">
+                        <span class="text-emerald-600 font-black text-3xl">S/ <span id="lbl-total-venta">0.00</span></span>
+                    </div>
                 </div>
-                <button id="btn-procesar-venta" disabled style="width: 100%; padding: 15px; font-size: 1.1em;">Confirmar Venta</button>
+                <button id="btn-procesar-venta" disabled class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-black text-lg transition-all shadow-lg shadow-emerald-100 active:scale-95 flex items-center justify-center gap-3">Confirmar Venta</button>
             </div>
         </aside>
     </main>
+
+    <div id="modal-confirmar-venta" class="fixed inset-0 z-[110] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-emerald-100 p-6 text-center animate-in fade-in zoom-in duration-200">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">💰</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2 italic">¿Confirmar Venta?</h3>
+            <p class="text-slate-500 text-sm mb-6">Estás por procesar una venta por un total de <span class="font-black text-emerald-600" id="monto-confirmar">S/ 0.00</span>.</p>
+            <div class="flex gap-3">
+                <button id="btn-confirmar-final" class="flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-100 transition-all">Si, Procesar</button>
+                <button onclick="cerrarModalConfirmar()" class="flex-grow bg-white border border-slate-200 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[200] flex flex-col gap-3 pointer-events-none"></div>
 
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>

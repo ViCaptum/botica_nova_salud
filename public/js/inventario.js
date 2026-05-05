@@ -1,28 +1,22 @@
-// Referencias al DOM
 const tbodyProductos = document.getElementById('tabla-productos-body');
 const selectTipo = document.getElementById('select-tipo');
 const inputBuscarInv = document.getElementById('input-buscar');
 
-// Referencias del Modal ADMIN
 const btnNuevo = document.getElementById('btn-nuevo-producto');
 const modalProducto = document.getElementById('modal-producto');
 const formProducto = document.getElementById('form-producto');
 const tituloFormulario = document.getElementById('titulo-formulario');
 
-// Obtenemos el usuario de la sesión
 const usuario = JSON.parse(localStorage.getItem('usuario_botica') || '{}');
 const esAdmin = usuario.rol === 1;
 
-// Contenedor para mostrar alertas de stock bajo el título
 const contenedorAlertas = document.getElementById('alertas-stock');
 
 if (esAdmin && btnNuevo) {
-    btnNuevo.style.display = 'inline-block';
+    btnNuevo.classList.remove('hidden');
+    btnNuevo.classList.add('flex');
 }
 
-// ==========================================
-// 1. CARGA DE DATOS Y RENDERIZADO
-// ==========================================
 async function cargarInventarioCompleto() {
     const buscar = inputBuscarInv.value.trim();
     const tipo = selectTipo.value;
@@ -35,69 +29,74 @@ async function cargarInventarioCompleto() {
         const productos = await API.get(endpoint);
         renderizarTablaInventario(productos);
     } catch (error) {
-        console.error("Error al cargar inventario:", error);
+        console.error(error);
     }
 }
 
 function renderizarTablaInventario(productos) {
     tbodyProductos.innerHTML = '';
     
-    if (productos.length === 0) {
-        tbodyProductos.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No se encontraron productos.</td></tr>';
+    if (!productos || productos.length === 0) {
+        tbodyProductos.innerHTML = '<tr><td colspan="8" class="py-12 text-center text-slate-400 italic">No se encontraron productos en el catálogo.</td></tr>';
         return;
     }
 
     productos.forEach(prod => {
         const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/50 transition-colors border-b border-slate-100";
         
         let botonesAccion = '';
         if (esAdmin) {
             const prodData = encodeURIComponent(JSON.stringify(prod));
             botonesAccion = `
-                <div style="display: flex; gap: 5px;">
-                    <button onclick="editarProducto('${prodData}')" style="background-color: var(--color-primario); color: black; padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">
-                    <img src="img/editar.png" alt="editar" class="btn-icon"> Editar
+                <div class="flex gap-2 justify-center">
+                    <button onclick="editarProducto('${prodData}')" class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all shadow-sm group">
+                        <img src="img/editar.png" alt="editar" class="w-4 h-4 transition-all group-hover:brightness-0 group-hover:invert">
                     </button>
-                    <button onclick="eliminarProducto(${prod.id_producto})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 6px 12px; font-size: 0.85em; border-radius: 6px;">
-                    <img src="img/papelera-de-reciclaje.png" alt="buscar" class="btn-icon">
+                    <button onclick="eliminarProducto(${prod.id_producto})" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm group">
+                        <img src="img/papelera-de-reciclaje.png" alt="eliminar" class="w-4 h-4 transition-all group-hover:brightness-0 group-hover:invert">
                     </button>
                 </div>
             `;
         } else {
-            botonesAccion = '<span style="color: var(--texto-secundario); font-size: 0.8em;">Solo lectura</span>';
+            botonesAccion = '<span class="text-slate-400 text-[10px] font-bold uppercase tracking-tighter">Solo Lectura</span>';
         }
 
+        const stockBajo = prod.stock_actual <= (prod.stock_minimo || 5);
+
         tr.innerHTML = `
-            <td style="font-family: monospace; color: var(--texto-secundario);">${prod.codigo_barras || '-'}</td>
-            <td style="font-weight: 500;">${prod.nombre_producto}</td>
-            <td>${prod.nombre_categoria || prod.categoria || '-'}</td>
-            <td>${prod.nombre_laboratorio || prod.laboratorio || '-'}</td>
-            <td>${prod.es_generico ? 'Genérico' : 'Marca'}</td>
-            <td style="font-weight: bold; color: var(--color-primario);">S/ ${parseFloat(prod.precio_venta).toFixed(2)}</td>
-            <td style="${prod.stock_actual <= (prod.stock_minimo || 5) ? 'color: var(--error); font-weight: bold;' : ''}">${prod.stock_actual}</td>
-            <td>${botonesAccion}</td>
+            <td class="px-6 py-4 font-mono text-xs text-slate-400">${prod.codigo_barras || '-'}</td>
+            <td class="px-6 py-4 font-semibold text-slate-700">${prod.nombre_producto}</td>
+            <td class="px-6 py-4 text-center">
+                <div class="text-sm font-medium text-slate-700">${prod.nombre_categoria || '-'}</div>
+            </td>
+            <td class="px-6 py-4 text-center text-xs text-slate-500 italic">${prod.nombre_laboratorio || '-'}</td>
+            <td class="px-6 py-4 text-center">
+                <span class="px-2 py-1 rounded-md text-[10px] font-black uppercase ${prod.es_generico ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}">
+                    ${prod.es_generico ? 'Genérico' : 'Marca'}
+                </span>
+            </td>
+            <td class="px-6 py-4 text-center font-bold text-emerald-600">S/ ${parseFloat(prod.precio_venta).toFixed(2)}</td>
+            <td class="px-6 py-4 text-center">
+                <span class="${stockBajo ? 'text-red-600 font-black animate-pulse' : 'text-slate-700 font-bold'}">
+                    ${prod.stock_actual}
+                </span>
+            </td>
+            <td class="px-6 py-4">${botonesAccion}</td>
         `;
         tbodyProductos.appendChild(tr);
     });
 }
 
-// ==========================================
-// 2. BÚSQUEDA REACTIVA (Sin presionar botones)
-// ==========================================
 selectTipo.addEventListener('change', cargarInventarioCompleto);
-
-// Busca al escribir en el input (Debounce simple recomendado para producción)
 inputBuscarInv.addEventListener('input', cargarInventarioCompleto);
 
-// ==========================================
-// 3. LÓGICA DE ADMINISTRADOR (Modales)
-// ==========================================
 function abrirModal() {
-    modalProducto.style.display = 'flex'; // Usamos flex para que el centrado CSS funcione
+    modalProducto.classList.replace('hidden', 'flex');
 }
 
 function cerrarModal() {
-    modalProducto.style.display = 'none';
+    modalProducto.classList.replace('flex', 'hidden');
 }
 
 if (btnNuevo) {
@@ -110,6 +109,7 @@ if (btnNuevo) {
 }
 
 document.getElementById('btn-cancelar-producto').addEventListener('click', cerrarModal);
+document.getElementById('btn-cerrar-modal').addEventListener('click', cerrarModal);
 
 window.editarProducto = function(productoEncoded) {
     const prod = JSON.parse(decodeURIComponent(productoEncoded));
@@ -117,19 +117,45 @@ window.editarProducto = function(productoEncoded) {
     tituloFormulario.textContent = `Editar: ${prod.nombre_producto}`;
     document.getElementById('prod-id').value = prod.id_producto;
     
-    document.getElementById('prod-categoria').value = prod.id_categoria || '';
-    document.getElementById('prod-laboratorio').value = prod.id_laboratorio || '';
+    const catSelect = document.getElementById('prod-categoria');
+    const labSelect = document.getElementById('prod-laboratorio');
+    
+    let catEncontrado = false;
+    for (let opt of catSelect.options) {
+        if (opt.text === prod.nombre_categoria) {
+            catSelect.value = opt.value;
+            catEncontrado = true;
+            break;
+        }
+    }
+    if (!catEncontrado) catSelect.value = "";
+
+    let labEncontrado = false;
+    for (let opt of labSelect.options) {
+        if (opt.text === prod.nombre_laboratorio) {
+            labSelect.value = opt.value;
+            labEncontrado = true;
+            break;
+        }
+    }
+    if (!labEncontrado) labSelect.value = "";
+    
     document.getElementById('prod-codigo').value = prod.codigo_barras || '';
-    document.getElementById('prod-nombre').value = prod.nombre_producto;
-    document.getElementById('prod-generico').value = prod.es_generico;
-    document.getElementById('prod-precio').value = prod.precio_venta;
-    document.getElementById('prod-stock').value = prod.stock_actual;
-    document.getElementById('prod-minimo').value = prod.stock_minimo || 5;
+    document.getElementById('prod-nombre').value = prod.nombre_producto || '';
+    document.getElementById('prod-generico').value = prod.es_generico ? "1" : "0";
+    
+    if (prod.precio_venta !== null && prod.precio_venta !== undefined) {
+        document.getElementById('prod-precio').value = parseFloat(prod.precio_venta).toFixed(2);
+    } else {
+        document.getElementById('prod-precio').value = '';
+    }
+    
+    document.getElementById('prod-stock').value = prod.stock_actual !== undefined ? prod.stock_actual : 0;
+    document.getElementById('prod-minimo').value = prod.stock_minimo !== undefined ? prod.stock_minimo : 5;
 
     abrirModal();
 };
 
-// Maneja el envío del formulario tanto para creación como para edición
 formProducto.addEventListener('submit', async (e) => {
     e.preventDefault();
     const idProducto = document.getElementById('prod-id').value;
@@ -137,45 +163,41 @@ formProducto.addEventListener('submit', async (e) => {
     const payload = {
         id_categoria: document.getElementById('prod-categoria').value || null,
         id_laboratorio: document.getElementById('prod-laboratorio').value || null,
-        codigo_barras: document.getElementById('prod-codigo').value,
+        codigo_barras: document.getElementById('prod-codigo').value || null,
         nombre_producto: document.getElementById('prod-nombre').value,
-        es_generico: document.getElementById('prod-generico').value,
-        precio_venta: document.getElementById('prod-precio').value,
-        stock_actual: document.getElementById('prod-stock').value,
-        stock_minimo: document.getElementById('prod-minimo').value
+        es_generico: parseInt(document.getElementById('prod-generico').value) || 0,
+        precio_venta: parseFloat(document.getElementById('prod-precio').value) || 0,
+        stock_actual: parseInt(document.getElementById('prod-stock').value) || 0,
+        stock_minimo: parseInt(document.getElementById('prod-minimo').value) || 0
     };
 
     try {
         if (idProducto) {
             await API.put(`/inventario/${idProducto}`, payload);
-            alert("Producto actualizado correctamente.");
         } else {
             await API.post('/inventario', payload);
-            alert("Producto guardado exitosamente.");
         }
         
         cerrarModal();
         cargarInventarioCompleto(); 
         cargarAlertasStock();
     } catch (error) {
-        alert("Error al guardar: " + error.message);
+        alert(error.message);
     }
 });
 
-// Elimina un producto del inventario (Solo para admins)
 window.eliminarProducto = async function(id) {
-    if(confirm("¿Estás seguro de eliminar este producto del inventario? Esta acción no se puede deshacer.")) {
+    if(confirm("¿Estás seguro de eliminar este producto?")) {
         try {
             await API.delete(`/inventario/${id}`);
             cargarInventarioCompleto();
             cargarAlertasStock();
         } catch (error) {
-            alert("No se puede eliminar: " + error.message);
+            alert(error.message);
         }
     }
 };
 
-// 4. INICIALIZACIÓN Y CATÁLOGOS
 async function cargarCatalogosFormulario() {
     try {
         const [categorias, laboratorios] = await Promise.all([
@@ -186,79 +208,63 @@ async function cargarCatalogosFormulario() {
         const selectCat = document.getElementById('prod-categoria');
         const selectLab = document.getElementById('prod-laboratorio');
 
-        selectCat.innerHTML = '<option value="">Seleccione una categoría</option>';
-        categorias.forEach(cat => { selectCat.innerHTML += `<option value="${cat.id_categoria}">${cat.nombre_categoria}</option>`; });
+        selectCat.innerHTML = '<option value="">Seleccione categoría</option>';
+        categorias.forEach(cat => { 
+            const opt = document.createElement('option');
+            opt.value = String(cat.id_categoria);
+            opt.textContent = cat.nombre_categoria;
+            selectCat.appendChild(opt);
+        });
 
-        selectLab.innerHTML = '<option value="">Seleccione un laboratorio</option>';
-        laboratorios.forEach(lab => { selectLab.innerHTML += `<option value="${lab.id_laboratorio}">${lab.nombre_laboratorio}</option>`; });
-
+        selectLab.innerHTML = '<option value="">Seleccione laboratorio</option>';
+        laboratorios.forEach(lab => { 
+            const opt = document.createElement('option');
+            opt.value = String(lab.id_laboratorio);
+            opt.textContent = lab.nombre_laboratorio;
+            selectLab.appendChild(opt);
+        });
     } catch (error) {
-        console.error("Error cargando catálogos para el formulario:", error);
+        console.error(error);
     }
 }
 
-// 5. ALERTAS DE STOCK BAJO
 async function cargarAlertasStock() {
     try {
         const alertas = await API.get('/inventario/alertas');
-
         contenedorAlertas.innerHTML = '';
 
-        if (!alertas || alertas.length === 0) {
-            return;
-        }
+        if (!alertas || alertas.length === 0) return;
 
         const div = document.createElement('div');
-        div.style.background = '#fff3cd';
-        div.style.border = '1px solid #ffeeba';
-        div.style.padding = '10px';
-        div.style.borderRadius = '8px';
-
+        div.className = "bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-4 shadow-sm";
         div.innerHTML = `
-            <strong>⚠️ Productos con bajo stock:</strong>
-            <ul style="margin-top: 8px;">
-                ${alertas.map(p => `
-                    <li>
-                        ${p.nombre_producto} 
-                        (Stock: ${p.stock_actual} / Min: ${p.stock_minimo})
-                    </li>
-                `).join('')}
-            </ul>
+            <span class="text-xl">⚠️</span>
+            <div>
+                <strong class="text-amber-800 block text-sm font-bold">Stock Crítico:</strong>
+                <p class="text-amber-600 text-xs">${alertas.map(p => p.nombre_producto).join(', ')}.</p>
+            </div>
         `;
+        contenedorAlertas.appendChild(div);
 
-        // Mostrar toast por cada producto
-        alertas.forEach(p => {
-            mostrarToast(`⚠️ ${p.nombre_producto} con stock bajo (${p.stock_actual})`);
-        });
-
+        alertas.forEach(p => mostrarToast(`Bajo stock: ${p.nombre_producto}`));
     } catch (error) {
-        console.error("Error cargando alertas:", error);
+        console.error(error);
     }
 }
 
-// Función para mostrar un toast de error (puede ser reutilizada en otros contextos)
 function mostrarToast(mensaje) {
     const container = document.getElementById('toast-container');
-
     const toast = document.createElement('div');
-    toast.style.background = '#dc3545';
-    toast.style.color = 'white';
-    toast.style.padding = '12px 16px';
-    toast.style.marginBottom = '10px';
-    toast.style.borderRadius = '8px';
-    toast.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
-    toast.style.animation = 'fadeIn 0.3s ease';
-
-    toast.textContent = mensaje;
-
+    toast.className = "bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right duration-300";
+    toast.innerHTML = `<span class="font-bold">!</span> <span>${mensaje}</span>`;
+    
     container.appendChild(toast);
-
     setTimeout(() => {
-        toast.remove();
+        toast.classList.add('animate-out', 'fade-out', 'slide-out-to-right');
+        setTimeout(() => toast.remove(), 300);
     }, 4000);
 }
 
-// Carga inicial del inventario y catálogos al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     cargarInventarioCompleto();
     cargarCatalogosFormulario();

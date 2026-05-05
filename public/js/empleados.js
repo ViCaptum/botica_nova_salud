@@ -1,27 +1,27 @@
-// ==========================================
-// REFERENCIAS DOM
-// ==========================================
 const formRegistro = document.getElementById('form-registro');
 const tbodyEmpleados = document.getElementById('tabla-empleados-body');
 const inputBuscarEmp = document.getElementById('input-buscar-emp');
 
-// Referencias del Modal de Edición
+// Referencias Modales
 const modalEditar = document.getElementById('modal-editar-emp');
 const formEditar = document.getElementById('form-editar-emp');
+const modalEliminar = document.getElementById('modal-confirmar-eliminar');
+const modalAdminConfirm = document.getElementById('modal-validar-admin');
 
+// Variables de estado
 let empleadosGlobal = [];
+let idEliminarTemporal = null;
+let payloadRegistroTemporal = null;
 const usuarioActual = JSON.parse(localStorage.getItem('usuario_botica') || '{}');
 
-// ==========================================
 // 1. CARGAR Y DIBUJAR DIRECTORIO
-// ==========================================
 async function cargarDirectorio() {
     try {
         empleadosGlobal = await API.get('/usuarios');
         renderizarTablaEmpleados(empleadosGlobal);
     } catch (error) {
         console.error("Error al cargar empleados:", error);
-        tbodyEmpleados.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--error);">Error al cargar directorio</td></tr>`;
+        tbodyEmpleados.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-red-500 font-medium">Error al cargar directorio del personal</td></tr>`;
     }
 }
 
@@ -29,33 +29,33 @@ function renderizarTablaEmpleados(lista) {
     tbodyEmpleados.innerHTML = '';
 
     if(lista.length === 0) {
-        tbodyEmpleados.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--texto-secundario);">No hay empleados registrados</td></tr>`;
+        tbodyEmpleados.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-400 italic">No hay empleados registrados en el sistema</td></tr>`;
         return;
     }
 
     lista.forEach(emp => {
         const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/50 transition-colors";
         
         const badgeRol = emp.rol === 1 
-            ? `<span style="background: rgba(139, 92, 246, 0.2); color: var(--color-secundario); padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">Administrador</span>`
-            : `<span style="background: rgba(148, 163, 184, 0.2); color: var(--texto-secundario); padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Vendedor</span>`;
+            ? `<span class="bg-violet-100 text-violet-700 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">Administrador</span>`
+            : `<span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">Vendedor</span>`;
 
-        const correo = emp.correo || '<span style="color:var(--borde)">Sin correo</span>';
-        const telefono = emp.telefono || '<span style="color:var(--borde)">Sin teléfono</span>';
+        const correo = emp.correo || '<span class="text-slate-300 italic text-xs">Sin correo</span>';
+        const telefono = emp.telefono || '<span class="text-slate-300 italic text-xs">Sin teléfono</span>';
 
         let botonesAdmin = '';
         if (usuarioActual.rol === 1) { 
             if (emp.id === usuarioActual.id) {
-                botonesAdmin = `<span style="color: var(--texto-secundario); font-size: 0.8em;">(Tú)</span>`;
+                botonesAdmin = `<span class="text-emerald-500 font-bold text-xs">Tú</span>`;
             } else {
-                // Ahora tenemos Editar y Eliminar
                 botonesAdmin = `
-                    <div style="display: flex; gap: 5px; justify-content: center;">
-                        <button onclick="abrirDetalles(${emp.id})" style="background-color: var(--color-primario); color: black; padding: 5px 10px; border-radius: 4px; font-size: 0.9em;" title="Ver Detalles / Editar">
-                        <img src="img/editar.png" alt="editar" class="btn-icon">
+                    <div class="flex gap-2 justify-center group">
+                        <button onclick="abrirDetalles(${emp.id})" class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all shadow-sm" title="Editar">
+                            <img src="img/editar.png" alt="editar" class="w-4 h-4 transition-all group-hover:brightness-0 group-hover:invert">
                         </button>
-                        <button onclick="eliminarEmpleado(${emp.id})" style="background-color: transparent; border: 1px solid var(--error); color: var(--error); padding: 5px 10px; border-radius: 4px; font-size: 0.9em;" title="Despedir / Eliminar">
-                        <img src="img/papelera-de-reciclaje.png" alt="editar" class="btn-icon">
+                        <button onclick="eliminarEmpleado(${emp.id})" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Eliminar">
+                            <img src="img/papelera-de-reciclaje.png" alt="eliminar" class="w-4 h-4 transition-all group-hover:brightness-0 group-hover:invert">
                         </button>
                     </div>
                 `;
@@ -63,14 +63,14 @@ function renderizarTablaEmpleados(lista) {
         }
 
         tr.innerHTML = `
-            <td style="font-weight: 500;">${emp.nombre} ${emp.apellidos}</td>
-            <td>${badgeRol}</td>
-            <td style="font-size: 0.9em;">
-                <div>📧 ${correo}</div>
-                <div style="margin-top: 4px;">📞 ${telefono}</div>
+            <td class="px-6 py-4 font-semibold text-slate-700">${emp.nombre} ${emp.apellidos}</td>
+            <td class="px-6 py-4">${badgeRol}</td>
+            <td class="px-6 py-4">
+                <div class="text-sm text-slate-600 flex items-center gap-2">📧 ${correo}</div>
+                <div class="text-xs text-slate-400 mt-1 flex items-center gap-2 font-medium">📞 ${telefono}</div>
             </td>
-            <td style="font-family: monospace; color: var(--texto-secundario);">${emp.username}</td>
-            <td style="text-align: center;">${botonesAdmin}</td>
+            <td class="px-6 py-4 font-mono text-xs text-emerald-600 font-bold">${emp.username}</td>
+            <td class="px-6 py-4 text-center">${botonesAdmin}</td>
         `;
         tbodyEmpleados.appendChild(tr);
     });
@@ -86,30 +86,28 @@ inputBuscarEmp.addEventListener('input', (e) => {
     renderizarTablaEmpleados(filtrados);
 });
 
-// ==========================================
-// 2. DETALLES, EDICIÓN Y ELIMINACIÓN
-// ==========================================
+// 2. MODAL DE EDICIÓN 
 window.abrirDetalles = function(id) {
-    // Buscamos al empleado en la memoria RAM (caché global)
     const emp = empleadosGlobal.find(e => e.id === id);
     if (!emp) return;
 
-    // Llenamos el modal con sus datos
     document.getElementById('edit-id').value = emp.id;
     document.getElementById('edit-nombre').value = emp.nombre;
     document.getElementById('edit-apellidos').value = emp.apellidos;
     document.getElementById('edit-telefono').value = emp.telefono || '';
     document.getElementById('edit-rol').value = emp.rol;
 
-    // Mostramos el modal
-    modalEditar.style.display = 'flex';
+    modalEditar.classList.replace('hidden', 'flex');
 };
 
-// Guardar los cambios del Modal
+window.cerrarModalEdicion = function() {
+    modalEditar.classList.replace('flex', 'hidden');
+    formEditar.reset();
+};
+
 if (formEditar) {
     formEditar.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const id = document.getElementById('edit-id').value;
         const payload = {
             nombre: document.getElementById('edit-nombre').value.trim(),
@@ -120,82 +118,152 @@ if (formEditar) {
 
         try {
             await API.put(`/usuarios/${id}`, payload);
-            alert("Datos del empleado actualizados.");
-            modalEditar.style.display = 'none';
-            cargarDirectorio(); // Recargamos la tabla
+            cerrarModalEdicion();
+            cargarDirectorio(); 
         } catch (error) {
             alert(`❌ Error al actualizar: ${error.message}`);
         }
     });
 }
 
-window.eliminarEmpleado = async function(id) {
-    if(confirm("¿Estás seguro de que deseas eliminar este empleado del sistema?")) {
-        try {
-            await API.delete(`/usuarios/${id}`);
-            alert("Empleado eliminado con éxito.");
-            cargarDirectorio(); 
-        } catch (error) {
-            alert(`No se pudo eliminar: ${error.message}`);
-        }
-    }
+// 3. ELIMINACIÓN CON VENTANA EMERGENTE
+window.eliminarEmpleado = function(id) {
+    const emp = empleadosGlobal.find(e => e.id === id);
+    if (!emp) return;
+    
+    idEliminarTemporal = id;
+    document.getElementById('nombre-emp-eliminar').textContent = `${emp.nombre} ${emp.apellidos}`;
+    modalEliminar.classList.replace('hidden', 'flex');
 };
 
-// ==========================================
-// 3. LÓGICA DE REGISTRO AUTOMATIZADO (Mantenida)
-// ==========================================
+window.cerrarModalEliminar = function() {
+    modalEliminar.classList.replace('flex', 'hidden');
+    idEliminarTemporal = null;
+};
+
+document.getElementById('btn-confirmar-delete').addEventListener('click', async () => {
+    try {
+        await API.delete(`/usuarios/${idEliminarTemporal}`);
+        cerrarModalEliminar();
+        cargarDirectorio(); 
+    } catch (error) {
+        alert(`No se pudo eliminar: ${error.message}`);
+    }
+});
+
+// 4. REGISTRO CON VALIDACIÓN ADMIN
 if (formRegistro) {
     formRegistro.addEventListener('submit', async (e) => {
         e.preventDefault(); 
 
         const msgError = document.getElementById('msg-error-registro');
         const msgExito = document.getElementById('msg-exito-registro');
-        
-        msgError.style.display = 'none';
-        msgExito.style.display = 'none';
+        msgError.classList.add('hidden');
+        msgExito.classList.add('hidden');
 
+        const idRol = parseInt(document.getElementById('reg-rol').value);
         const nombre = document.getElementById('reg-nombre').value.trim();
         const apellidos = document.getElementById('reg-apellidos').value.trim();
         
         const primerNombre = nombre.split(' ')[0].toLowerCase().replace(/[^a-z]/g, '');
         const primerApellido = apellidos.split(' ')[0].toLowerCase().replace(/[^a-z]/g, '');
-        const numAleatorio = Math.floor(Math.random() * 900) + 100; 
         
-        const generatedUsername = `${primerNombre.charAt(0)}${primerApellido}${numAleatorio}`;
+        const generatedUsername = `${primerNombre.charAt(0)}${primerApellido}${Math.floor(Math.random() * 900) + 100}`;
         const generatedPassword = `Nova${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`;
 
-        const payload = {
-            nombre: nombre,
-            apellidos: apellidos,
+        payloadRegistroTemporal = {
+            id_rol: idRol,
+            nombre,
+            apellidos,
             correo: document.getElementById('reg-correo').value.trim(),
             telefono: document.getElementById('reg-telefono').value.trim(),
-            id_rol: parseInt(document.getElementById('reg-rol').value),
             username: generatedUsername,
             password: generatedPassword
         };
 
-        try {
-            await API.post('/usuarios/registro', payload);
-            
-            msgExito.innerHTML = `
-                <div style="text-align: center; margin-bottom: 10px;"><strong>¡Empleado Registrado!</strong></div>
-                Entréguele estas credenciales de acceso:<br><br>
-                <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; font-family: monospace;">
-                    <strong>Usuario:</strong> ${generatedUsername}<br>
-                    <strong>Clave:</strong> ${generatedPassword}
-                </div>
-            `;
-            msgExito.style.display = 'block';
-            
-            formRegistro.reset();
-            cargarDirectorio();
-
-        } catch (error) {
-            msgError.textContent = `Error: ${error.message}`;
-            msgError.style.display = 'block';
+        if (idRol === 1) {
+            modalAdminConfirm.classList.replace('hidden', 'flex');
+            document.getElementById('confirm-pass-admin').focus();
+        } else {
+            ejecutarRegistro();
         }
     });
 }
 
-// INICIALIZACIÓN
+window.cerrarModalAdmin = function() {
+    modalAdminConfirm.classList.replace('flex', 'hidden');
+    document.getElementById('confirm-pass-admin').value = '';
+    document.getElementById('msg-error-admin-confirm').classList.add('hidden');
+    payloadRegistroTemporal = null;
+};
+
+document.getElementById('btn-validar-y-registrar').addEventListener('click', async () => {
+    const passActual = document.getElementById('confirm-pass-admin').value;
+    const errorMsg = document.getElementById('msg-error-admin-confirm');
+    
+    if (!passActual) return;
+
+    try {
+        const sessionData = JSON.parse(localStorage.getItem('usuario_botica') || '{}');
+        const usernameAdmin = sessionData.username;
+
+        const response = await fetch('/api/usuarios/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username: usernameAdmin, 
+                password: passActual 
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Contraseña incorrecta");
+        }
+        await ejecutarRegistro(); 
+        cerrarModalAdmin();
+        
+    } catch (error) {
+        errorMsg.textContent = error.message;
+        errorMsg.classList.remove('hidden');
+    }
+});
+
+async function ejecutarRegistro() {
+    const msgError = document.getElementById('msg-error-registro');
+    const msgExito = document.getElementById('msg-exito-registro');
+    
+    if (!payloadRegistroTemporal) {
+        console.error("Error: El payload de registro se perdió.");
+        return;
+    }
+
+    try {
+        await API.post('/usuarios/registro', payloadRegistroTemporal);
+        
+        msgExito.innerHTML = `
+            <div class="text-center font-bold mb-2 italic text-emerald-800">✅ Registro Exitoso</div>
+            <div class="bg-emerald-900/10 p-3 rounded-lg border border-emerald-200 font-mono text-[11px]">
+                <strong>User:</strong> ${payloadRegistroTemporal.username}<br>
+                <strong>Pass:</strong> ${payloadRegistroTemporal.password}
+            </div>
+        `;
+        msgExito.classList.remove('hidden');
+        formRegistro.reset();
+        cargarDirectorio();
+        
+    } catch (error) {
+        msgError.textContent = `Error: ${error.message}`;
+        msgError.classList.remove('hidden');
+        throw error;
+    }
+}
+
+window.cerrarModalAdmin = function() {
+    modalAdminConfirm.classList.replace('flex', 'hidden');
+    document.getElementById('confirm-pass-admin').value = '';
+    document.getElementById('msg-error-admin-confirm').classList.add('hidden');
+};
+
 document.addEventListener('DOMContentLoaded', cargarDirectorio);

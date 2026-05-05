@@ -2,73 +2,99 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de Ventas - Botica Nova Salud</title>
-    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
-    
-    <main>
-        <section>
-            <h2 style="font-size: 2em; margin-bottom: 5px;">Auditoría de Ventas</h2>
-            <p style="color: var(--texto-secundario); margin-bottom: 25px;">Consulta el registro histórico de las transacciones realizadas en caja.</p>
+<body class="bg-slate-50 min-h-screen">
+    <main class="transition-all duration-300 lg:ml-[72px] p-4 md:p-8">
+        <section class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Registro de Ventas</h2>
+                <p class="text-slate-500 mt-1">Consulta el historial de las transacciones realizadas en caja.</p>
+            </header>
             
-            <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 25px;">
-                <div class="autocomplete-container" style="flex-grow: 1;">
-                    <label for="input-buscar-vendedor">Filtrar por Vendedor (Nombre o Username):</label>
-                    <input type="text" id="input-buscar-vendedor" placeholder="Escribe para buscar empleado..." autocomplete="off">
-                    <div id="lista-empleados" class="autocomplete-list"></div>
+            <div class="flex flex-col md:flex-row gap-4 items-end mb-8 bg-slate-50/50 p-6 rounded-xl border border-slate-100">
+                <div class="relative flex-grow w-full">
+                    <label for="input-buscar-vendedor" class="block text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">Filtrar por Vendedor:</label>
+                    <div class="relative">
+                        <input type="text" id="input-buscar-vendedor" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-sm" 
+                            placeholder="Escribe nombre o username..." autocomplete="off">
+                    </div>
+                    
+                    <div id="lista-empleados" class="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto">
+                    </div>
                     <input type="hidden" id="vendedor-id-seleccionado">
                 </div>
                 
-                <button id="btn-filtrar-ventas" style="white-space: nowrap; padding: 12px 20px;">
-                    <img src="img/buscar.png" alt="buscar" class="btn-icon"> Aplicar Filtro
+                <button id="btn-filtrar-ventas" 
+                    class="w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-md shadow-slate-200 active:scale-95">
+                    <img src="img/buscar.png" alt="buscar" class="w-3.5 h-3.5 brightness-0 invert"> 
+                    <span>Buscar</span>
                 </button>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Venta</th>
-                        <th>Fecha</th>
-                        <th>Vendedor</th>
-                        <th>DNI Cliente</th>
-                        <th>Total (S/)</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-historial-body">
-                    <!-- Filas del historial -->
-                </tbody>
-            </table>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">ID Venta</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Fecha</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Vendedor</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">DNI Cliente</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Total</th>
+                            <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-historial-body" class="divide-y divide-slate-100">
+                        <!-- Filas inyectadas -->
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
-    <!-- Modal de Detalles ventas -->
-    <div id="modal-detalle" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="max-width: 700px;">
-            <h2>Detalle de Venta</h2>
 
-            <div id="info-venta" style="margin-bottom: 15px;"></div>
+    <!-- MODAL DETALLES VENTAS -->
+    <div id="modal-detalle" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-emerald-100 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-emerald-600">Detalle de Venta</h2>
+                <button onclick="cerrarModalDetalle()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+            </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cant.</th>
-                        <th>P. Unitario</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody id="detalle-body"></tbody>
-            </table>
+            <div class="p-6">
+                <!-- Info de la Venta -->
+                <div id="info-venta" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 p-4 bg-emerald-50/50 rounded-xl border border-emerald-100 text-sm">
+                </div>
 
-            <div style="text-align: right; margin-top: 15px;">
-                <button onclick="cerrarModalDetalle()">Cerrar</button>
+                <div class="overflow-hidden rounded-lg border border-slate-200">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-2 text-xs font-bold text-slate-500 uppercase">Producto</th>
+                                <th class="px-4 py-2 text-xs font-bold text-slate-500 uppercase">Cant.</th>
+                                <th class="px-4 py-2 text-xs font-bold text-slate-500 uppercase">P. Unitario</th>
+                                <th class="px-4 py-2 text-xs font-bold text-slate-500 uppercase">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detalle-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="cerrarModalDetalle()" class="px-8 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all">
+                        Cerrar Detalle
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
     <script src="js/auth.js"></script>
     <script src="js/api.js"></script>
     <script src="js/historial.js"></script> 
