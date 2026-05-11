@@ -23,6 +23,32 @@
             
             <form id="form-editar-emp" class="p-6 space-y-4">
                 <input type="hidden" id="edit-id">
+                
+                <!-- Campos añadidos que faltaban -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombres</label>
+                        <input type="text" id="edit-nombre" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Apellidos</label>
+                        <input type="text" id="edit-apellidos" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Teléfono</label>
+                    <input type="text" id="edit-telefono" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rol de Acceso</label>
+                    <select id="edit-rol" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer">
+                        <option value="2">Vendedor (Caja e Inv.)</option>
+                        <option value="1">Administrador (Total)</option>
+                    </select>
+                </div>
+
                 <div class="flex gap-3 pt-2">
                     <button type="submit" class="flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Guardar Cambios</button>
                     <button type="button" onclick="cerrarModalEdicion()" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50">Cancelar</button>

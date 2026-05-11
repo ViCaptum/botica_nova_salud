@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+# No necesitamos meter el dump SQL dentro de la imagen del backend
+/database/*.sql

@@ -19,9 +19,9 @@ npm install
 Crea un archivo nuevo llamado exactamente ".env" en la carpeta raíz y pega esto:
 ```env
 DB_HOST=localhost
-DB_USER=root 
-DB_PASSWORD=
-DB_NAME=botica_nova_salud
+DB_USER=root
+DB_PASSWORD=admin
+DB_NAME=botica_db
 DB_PORT=3306
 JWT_SECRET=mi_clave_ultra_secreta
 ```
